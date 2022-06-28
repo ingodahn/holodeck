@@ -8,17 +8,62 @@
       </v-col>
     </v-row>
     <v-row>
-        <v-col v-if="bookObject">
-            <v-btn color='primary' @click="currentPage=1" :disabled="(currentPage == 1)">|&lt;&lt;</v-btn>
-            <v-btn color='primary' @click="currentPage--" :disabled="(currentPage == 1)">&lt;</v-btn>
-            <input v-model="currentPage" size="3" outlined/>
-            <v-btn color='primary' @click="currentPage++" :disabled = "(currentPage == bookObject.pages.length)">&gt;</v-btn>
-            <v-btn color='primary' @click="currentPage=bookObject.pages.length" :disabled = "(currentPage == bookObject.pages.length)">&gt;&gt;|</v-btn>
-        </v-col>
+      <v-col>
+        <Pinboard  ref="pinboard"/>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col v-if="bookObject">
+        <v-btn
+          color="primary"
+          @click="currentPage = 1"
+          :disabled="currentPage == 1"
+          >|&lt;&lt;</v-btn
+        >
+        <v-btn
+          color="primary"
+          @click="currentPage--"
+          :disabled="currentPage == 1"
+          >&lt;</v-btn
+        >
+        <input v-model="pre" type="number" size="3" max="0" min="-3" outlined />
+        <input
+          v-model="currentPage"
+          type="number"
+          min="1"
+          :max="bookPageIds.length"
+          size="3"
+          outlined
+        />
+        <input v-model="post" type="number" min="0" max="3" outlined />
+        <v-btn
+          color="primary"
+          @click="currentPage++"
+          :disabled="currentPage == bookPageIds.length"
+          >&gt;</v-btn
+        >
+        <v-btn
+          color="primary"
+          @click="currentPage = bookPageIds.length"
+          :disabled="currentPage == bookPageIds.length"
+          >&gt;&gt;|</v-btn
+        >
+        <v-btn color='primary' @click="pageToPinboard()">To Piboard</v-btn>
+      </v-col>
+    </v-row>
+    <v-row v-for="item in pageIds.pre" :key="item">
+      <v-col>
+        <page-content :pageId="item"></page-content>
+      </v-col>
     </v-row>
     <v-row>
       <v-col>
-        <page-content :pageId="pageId"></page-content>
+        <page-content :pageId="pageIds.cur" currentPage></page-content>
+      </v-col>
+    </v-row>
+    <v-row v-for="item in pageIds.post" :key="item">
+      <v-col>
+        <page-content :pageId="item"></page-content>
       </v-col>
     </v-row>
   </div>
@@ -26,30 +71,61 @@
 
 <script>
 import { PageCollection } from "../../api/PageCollection";
-import PageContent from './PageContent.vue';
+import PageContent from "./PageContent.vue";
+import Pinboard from "./Pinboard.vue";
 export default {
   mounted() {},
   data() {
     return {
       currentPage: 1,
+      pre: -1,
+      post: 0,
     };
   },
-  components: {PageContent},
-  methods: {},
+  components: { PageContent, Pinboard },
+  methods: {
+    pageToPinboard () {
+      let currentPages=document.getElementsByClassName('currentPage');
+      let node=currentPages[0];
+      let clone=node.cloneNode(true);
+      clone.classList.remove('currentPage');
+      let cloneText=clone.textContent.replace(/(\s\s+)/gm, "");
+      let cloneString=clone.innerHTML;
+      let title = cloneText.split(' ').slice(0,4).join(' ');
+      this.$refs.pinboard.add(title,cloneString);
+    },
+  },
   computed: {
-    pageId () {
-      return this.bookObject.pages[this.currentPage-1];
-    }
+    bookPageIds() {
+      return this.bookObject.pages;
+    },
+    pageIds() {
+      //Need to pasein since input yields strings
+      let cur0 = parseInt(this.currentPage),
+        pre0 = parseInt(this.pre),
+        post0 = parseInt(this.post);
+      let cur = cur0 < 1 ? 1 : cur0 - 1;
+      (preIds = []),
+        (postIds = []),
+        (preMin = pre0 > 0 ? cur0 : cur + pre0),
+        (postMax = post0 < 0 ? cur0 : cur0 + post0);
+      for (let i = preMin; i < cur; i++) {
+        if (i >= 0) preIds.push(this.bookPageIds[i]);
+      }
+      for (let i = cur + 1; i < postMax; i++) {
+        if (i < this.bookObject.pages.length) postIds.push(this.bookPageIds[i]);
+      }
+      return { pre: preIds, cur: this.bookPageIds[cur], post: postIds };
+    },
   },
   meteor: {
     bookObject() {
       const bo = PageCollection.findOne({ type: "book" });
-      return bo ? bo : { title: "No Book Found" ,pages: []};
+      return bo ? bo : { title: "No Book Found", pages: [] };
     },
   },
 };
 </script>
 
 <style scoped>
-
 </style>

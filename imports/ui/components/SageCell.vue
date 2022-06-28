@@ -2,7 +2,9 @@
   <div class="container">
     <v-row>
       <v-col>
-        <div v-html="makeCell"></div>
+        <div :class="isCurrent">
+          <div v-html="makeCell"></div>
+        </div>
       </v-col>
     </v-row>
   </div>
@@ -12,7 +14,16 @@
 
 <script>
 export default {
-  props: ["script"],
+  props: {
+    "script": {
+      type: String,
+      default: "1+1"
+    },
+    "currentPage": {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {};
   },
@@ -25,6 +36,7 @@ export default {
       languages: ["sage"],
       evalButtonText: "Evaluate",
       linked: true,
+      linkKey: 'Holodeck'
     });
   },
   computed: {
@@ -35,6 +47,18 @@ export default {
         "<\/script></div>"
       );
     },
+    isCurrent () {
+      return (this.currentPage)?"currentPage":"";
+    }
   },
 };
 </script>
+
+<style scoped>
+.currentPage {
+  padding: 1em;
+  border-style: none solid none solid;
+  border-left-color: blue;
+  border-right-color: blue;
+}
+</style>
