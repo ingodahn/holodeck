@@ -40,9 +40,6 @@ export default {
     };
   },
   watch: {
-    sessionFile(newVal) {
-      console.log(newVal);
-    }
   },
   methods: {
     importbook() {

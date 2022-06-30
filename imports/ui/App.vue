@@ -1,12 +1,22 @@
 <template>
   <v-app>
     <v-app-bar app>
-      <v-btn color="primary" class="mx-1 my-1" @click="mode = 'book'">Book</v-btn>
-      <v-btn color="warning" class="mx-1 my-1" @click="mode = 'admin'">Tools</v-btn>
+      <v-btn
+        color="primary"
+        class="mx-1 my-1"
+        @click="session.set('mode', 'book', 'App')"
+        >Book</v-btn
+      >
+      <v-btn
+        color="warning"
+        class="mx-1 my-1"
+        @click="session.set('mode', 'admin', 'App')"
+        >Tools</v-btn
+      >
     </v-app-bar>
     <v-main>
-      <Book v-if="mode == 'book'"></Book>
-      <Admin v-if="mode == 'admin'"></Admin>
+      <Book v-if="session.mode == 'book'"></Book>
+      <Admin v-if="session.mode == 'admin'"></Admin>
     </v-main>
   </v-app>
 </template>
@@ -24,7 +34,29 @@ export default {
   },
   data() {
     return {
-      mode: "book",
+      session: {
+        mode: "book",
+        bookId: "none",
+        currentPage: 1,
+        pre: -1,
+        post: 0,
+        evaluated: new Set(),
+        debug: false,
+        set(item, newValue, by = "anonymous") {
+          if (this.debug)
+            console.log("Session setting", item, "to", newValue, "by", by);
+          this[item] = newValue;
+        },
+        clear () {
+          this.mode = "book";
+          this.bookId = "none";
+          this.currentPage = 1;
+          this.pre = -1;
+          this.post = 0,
+          this.evaluated = new Set();
+        }
+
+      }
     };
   },
   methods: {},

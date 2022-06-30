@@ -2,7 +2,7 @@
   <div class="container">
     <v-row>
       <v-col>
-        <div :class="isCurrent">
+        <div :class="isCurrent" :name="pageId">
           <div v-html="makeCell"></div>
         </div>
       </v-col>
@@ -15,17 +15,24 @@
 <script>
 export default {
   props: {
-    "script": {
+    script: {
       type: String,
-      default: "1+1"
+      default: "1+1",
     },
-    "currentPage": {
+    currentPage: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
+    pageId: {
+      type: String,
+      default: "none",
+    },
   },
   data() {
-    return {};
+    return {
+      session: this.$root.$data.session,
+      evaluated: this.$root.$data.session.evaluated.has(this.pageId),
+    };
   },
   mounted() {
     // Make *any* div with class 'compute' a Sage cell
@@ -36,8 +43,23 @@ export default {
       languages: ["sage"],
       evalButtonText: "Evaluate",
       linked: true,
-      linkKey: 'Holodeck'
+      linkKey: "Holodeck",
+      callback: () => {
+        let node = document.getElementsByName(this.pageId)[0];
+        let bt = node.getElementsByClassName("sagecell_evalButton");
+        bt[0].addEventListener("click", this.isEvaluated);
+      },
     });
+  },
+  watch: {
+    evaluated(newValue) {
+      if (newValue == true) this.session.evaluated.add(this.pageId);
+    },
+  },
+  methods: {
+    isEvaluated() {
+      this.evaluated = true;
+    },
   },
   computed: {
     makeCell() {
@@ -47,9 +69,11 @@ export default {
         "<\/script></div>"
       );
     },
-    isCurrent () {
-      return (this.currentPage)?"currentPage":"";
-    }
+    isCurrent() {
+      const ev = this.evaluated ? "evaluated":"unevaluated";
+      const cur = this.currentPage ? "currentPage" : "";
+      return cur + " " + ev;
+    },
   },
 };
 </script>
@@ -60,5 +84,17 @@ export default {
   border-style: none solid none solid;
   border-left-color: blue;
   border-right-color: blue;
+}
+.unevaluated {
+  padding: 1em;
+  border-style: none solid none solid;
+  border-left-color: blue;
+  border-right-color: orange;
+}
+.evaluated {
+  padding: 1em;
+  border-style: none solid none solid;
+  border-left-color: blue;
+  border-right-color: green;
 }
 </style>

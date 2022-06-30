@@ -1,5 +1,5 @@
 <template>
-  <div class="continer">
+  <div class="container">
     <v-row>
       <v-col>
         <h1>Book: {{ bookObject.title }}</h1>
@@ -16,39 +16,39 @@
       <v-col v-if="bookObject">
         <v-btn
           color="primary"
-          @click="currentPage = 1"
-          :disabled="currentPage == 1"
+          @click="session.set('currentPage',1,'Book')"
+          :disabled="session.currentPage == 1"
           >|&lt;&lt;</v-btn
         >
         <v-btn
           color="primary"
-          @click="currentPage--"
-          :disabled="currentPage == 1"
+          @click="session.set('currentPage',session.currentPage-1,'Book')"
+          :disabled="session.currentPage == 1"
           >&lt;</v-btn
         >
-        <input v-model="pre" type="number" size="3" max="0" min="-3" outlined />
+        <input v-model="session.pre" type="number" size="3" max="0" min="-3" outlined />
         <input
-          v-model="currentPage"
+          v-model="session.currentPage"
           type="number"
           min="1"
           :max="bookPageIds.length"
           size="3"
           outlined
         />
-        <input v-model="post" type="number" min="0" max="3" outlined />
+        <input v-model="session.post" type="number" min="0" max="3" outlined />
         <v-btn
           color="primary"
-          @click="currentPage++"
-          :disabled="currentPage == bookPageIds.length"
+          @click="session.set('currentPage',session.currentPage+1,'Book')"
+          :disabled="session.currentPage == bookPageIds.length"
           >&gt;</v-btn
         >
         <v-btn
           color="primary"
-          @click="currentPage = bookPageIds.length"
-          :disabled="currentPage == bookPageIds.length"
+          @click="session.set('currentPage', bookPageIds.length,'Book')"
+          :disabled="session.currentPage == bookPageIds.length"
           >&gt;&gt;|</v-btn
         >
-        <v-btn color='primary' @click="pageToPinboard()">To Piboard</v-btn>
+        <v-btn color='primary' @click="pageToPinboard()">To Pinboard</v-btn>
       </v-col>
     </v-row>
     <v-row v-for="item in pageIds.pre" :key="item">
@@ -77,9 +77,7 @@ export default {
   mounted() {},
   data() {
     return {
-      currentPage: 1,
-      pre: -1,
-      post: 0,
+      session: this.$root.$data.session,
     };
   },
   components: { PageContent, Pinboard },
@@ -101,9 +99,9 @@ export default {
     },
     pageIds() {
       //Need to pasein since input yields strings
-      let cur0 = parseInt(this.currentPage),
-        pre0 = parseInt(this.pre),
-        post0 = parseInt(this.post);
+      let cur0 = parseInt(this.session.currentPage),
+        pre0 = parseInt(this.session.pre),
+        post0 = parseInt(this.session.post);
       let cur = cur0 < 1 ? 1 : cur0 - 1;
       (preIds = []),
         (postIds = []),
@@ -121,6 +119,7 @@ export default {
   meteor: {
     bookObject() {
       const bo = PageCollection.findOne({ type: "book" });
+      if (bo) this.session.set('bookId',bo._id,'Book');
       return bo ? bo : { title: "No Book Found", pages: [] };
     },
   },

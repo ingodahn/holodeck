@@ -1,7 +1,7 @@
 <template>
     <div class = 'container'>
         <ShowMathDoc v-if="pageType == 'markdown-cell'" :content="getContent" :currentPage="currentPage"></ShowMathDoc>
-        <SageCell v-else-if="pageType == 'code-cell'" :script="getCodeContent" :currentPage="currentPage"></SageCell>
+        <SageCell v-else-if="pageType == 'code-cell'" :script="getCodeContent" :currentPage="currentPage" :pageId="pageId" @evaluated = "(id) => $emit('evaluated',id)"></SageCell>
         <div v-else>Unknown Page Type {{ pageType }}</div>
     </div>
 </template>
@@ -11,18 +11,22 @@ import { PageCollection } from "../../api/PageCollection";
 import ShowMathDoc from './ShowMathDoc.vue';
 import SageCell from './SageCell.vue';
 export default {
-    props: ['pageId'],
     props: {
-    "pageId": {
-      type: String,
-      default: ""
+        "pageId": {
+        type: String,
+        default: ""
+        },
+        "currentPage": {
+        type: Boolean,
+        default: false
+        }
     },
-    "currentPage": {
-      type: Boolean,
-      default: false
-    }
-  },
     components: { ShowMathDoc, SageCell },
+    data () {
+        return {
+            session: this.$root.$data.session,
+        }
+    },
     computed: {
         getPage () {
             const page = PageCollection.findOne({_id: this.pageId});
@@ -43,7 +47,7 @@ export default {
         },
         pageType (){
             return this.getPage.type;
-        }
+        },
     }
 }
 </script>
