@@ -59,7 +59,6 @@ export default {
       //alert("Making book");
       this.clearPages();
       const bookData = JSON.parse(dataString);
-      console.log('Pages read:',bookData.length)
       let bookPages=[];
       bookData.forEach(element => {
         const pageId=Random.id([17]);

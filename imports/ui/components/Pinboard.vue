@@ -21,11 +21,19 @@
 <script>
 export default {
     data () {
-        return {items: []}
+        return {
+            session: this.$root.$data.session,
+            //items: []
+            }
     },
     methods: {
         add(title,content) {
             this.items.push({title: title, content: content});
+        }
+    },
+    computed: {
+        items () {
+            return this.session.pinboard;
         }
     }
 }

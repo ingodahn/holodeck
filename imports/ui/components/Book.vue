@@ -90,7 +90,8 @@ export default {
       let cloneText=clone.textContent.replace(/(\s\s+)/gm, "");
       let cloneString=clone.innerHTML;
       let title = cloneText.split(' ').slice(0,4).join(' ');
-      this.$refs.pinboard.add(title,cloneString);
+      //this.$refs.pinboard.add(title,cloneString);
+      this.session.pinboard.push({title: title, content: cloneString});
     },
   },
   computed: {
