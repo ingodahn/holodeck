@@ -27,6 +27,7 @@
           >&lt;</v-btn
         >
         <input v-model="session.pre" type="number" size="3" max="0" min="-3" outlined />
+        Page
         <input
           v-model="session.currentPage"
           type="number"
@@ -91,7 +92,7 @@ export default {
       let cloneString=clone.innerHTML;
       let title = cloneText.split(' ').slice(0,4).join(' ');
       //this.$refs.pinboard.add(title,cloneString);
-      this.session.pinboard.push({title: title, content: cloneString});
+      this.session.pinboard.push({title: title, content: cloneString, pageNr: this.session.currentPage});
     },
   },
   computed: {

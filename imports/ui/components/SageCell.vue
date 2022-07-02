@@ -79,22 +79,26 @@ export default {
 </script>
 
 <style scoped>
-.currentPage {
-  padding: 1em;
-  border-style: none solid none solid;
-  border-left-color: blue;
-  border-right-color: blue;
-}
 .unevaluated {
   padding: 1em;
-  border-style: none solid none solid;
-  border-left-color: blue;
+  border-style: none solid none none;
   border-right-color: orange;
 }
 .evaluated {
   padding: 1em;
-  border-style: none solid none solid;
-  border-left-color: blue;
+  border-style: none solid none none;
   border-right-color: green;
+}
+.currentPage.evaluated {
+  padding: 1em;
+  border-style: none solid none solid;
+  border-left-color: green;
+  border-right-color: green;
+}
+.currentPage.unevaluated {
+  padding: 1em;
+  border-style: none solid none solid;
+  border-left-color: orange;
+  border-right-color: orange;
 }
 </style>
