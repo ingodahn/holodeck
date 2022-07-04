@@ -4,6 +4,12 @@
       <v-btn
         color="primary"
         class="mx-1 my-1"
+        @click="session.set('mode', 'home', 'App')"
+        >Home</v-btn
+      >
+      <v-btn
+        color="primary"
+        class="mx-1 my-1"
         @click="session.set('mode', 'book', 'App')"
         >Book</v-btn
       >
@@ -30,6 +36,7 @@
       >
     </v-app-bar>
     <v-main>
+      <Home v-if="session.mode == 'home'"></Home>
       <Book v-if="session.mode == 'book'"></Book>
       <Admin v-if="session.mode == 'admin'"></Admin>
     </v-main>
@@ -37,13 +44,14 @@
 </template>
 
 <script>
-import Vue from "vue";
+//import Vue from "vue";
+import Home from "./components/Home.vue";
 import Book from "./components/Book.vue";
-//import { PageCollection } from "../api/PageCollection";
+import { PageCollection } from "../api/PageCollection";
 import Admin from "./components/Admin.vue";
 export default {
   components: {
-    //Page,
+    Home,
     Book,
     Admin,
   },
@@ -72,6 +80,7 @@ export default {
           this.post = 0,
           this.pinboard = [],
           this.evaluated = new Set();
+          PageCollection.findOne({type: 'book',title: "|| Free Pages"})._id;
         }
 
       }

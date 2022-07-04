@@ -36,6 +36,7 @@ export default {
             return this.getPage.data;
         },
         getCodeContent () {
+            /*
             if (this.getPage.type == 'code-cell') {
                 let tmpCell=document.createElement('tmpCell');
                 tmpCell.innerHTML=this.getPage.data;
@@ -44,6 +45,8 @@ export default {
                 return content;
             } else
             return '1+1';
+            */
+           return this.getPage.script;
         },
         pageType (){
             return this.getPage.type;

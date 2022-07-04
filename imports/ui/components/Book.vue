@@ -22,7 +22,7 @@
         >
         <v-btn
           color="primary"
-          @click="session.set('currentPage',session.currentPage-1,'Book')"
+          @click="backOnePage"
           :disabled="session.currentPage == 1"
           >&lt;</v-btn
         >
@@ -39,7 +39,7 @@
         <input v-model="session.post" type="number" min="0" max="3" outlined />
         <v-btn
           color="primary"
-          @click="session.set('currentPage',session.currentPage+1,'Book')"
+          @click="forwardOnePage"
           :disabled="session.currentPage == bookPageIds.length"
           >&gt;</v-btn
         >
@@ -88,12 +88,17 @@ export default {
       let node=currentPages[0];
       let clone=node.cloneNode(true);
       clone.classList.remove('currentPage');
-      let cloneText=clone.textContent.replace(/(\s\s+)/gm, "");
+      clone.querySelectorAll('.sagecell_evalButton').forEach(bt => {bt.remove()});
       let cloneString=clone.innerHTML;
-      let title = cloneText.split(' ').slice(0,4).join(' ');
-      //this.$refs.pinboard.add(title,cloneString);
+      let title=PageCollection.findOne({_id: this.pageIds.cur}).title;
       this.session.pinboard.push({title: title, content: cloneString, pageNr: this.session.currentPage});
     },
+    backOnePage () {
+      this.session.set('currentPage',parseInt(this.session.currentPage)-1,'Book')
+    },
+    forwardOnePage () {
+      this.session.set('currentPage',parseInt(this.session.currentPage)+1,'Book')
+    }
   },
   computed: {
     bookPageIds() {
@@ -117,11 +122,11 @@ export default {
       }
       return { pre: preIds, cur: this.bookPageIds[cur], post: postIds };
     },
+    
   },
   meteor: {
     bookObject() {
-      const bo = PageCollection.findOne({ type: "book" });
-      if (bo) this.session.set('bookId',bo._id,'Book');
+      const bo = PageCollection.findOne({ _id: this.session.bookId });
       return bo ? bo : { title: "No Book Found", pages: [] };
     },
   },
