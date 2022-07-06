@@ -53,12 +53,21 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col>
+        <v-btn color="primary" class="mx-1 my-1" @click="adminMode='users'">User Management</v-btn>
+      </v-col>
+    </v-row>
+    <v-row v-if="adminMode == 'users'">
+      <UserManagement></UserManagement>
+    </v-row>
   </div>
 </template>
 
 <script>
 import { PageCollection } from "../../api/PageCollection";
 import { Random } from "meteor/random";
+import UserManagement from "./UserManagement.vue"
 export default {
   data() {
     return {
@@ -67,6 +76,7 @@ export default {
       bookToDelete: null
     };
   },
+  components: { UserManagement },
   watch: {
   },
   methods: {
