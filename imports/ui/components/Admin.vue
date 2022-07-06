@@ -65,7 +65,7 @@
 </template>
 
 <script>
-import { PageCollection } from "../../api/PageCollection";
+import { PageCollection } from "../../api/collections/PageCollection";
 import { Random } from "meteor/random";
 import UserManagement from "./UserManagement.vue"
 export default {

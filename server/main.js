@@ -1,7 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
-import { PageCollection } from '/imports/api/PageCollection';
+import { PageCollection } from '/imports/api/collections/PageCollection';
+import '/imports/api/publications';
 import '/imports/api/methods/UserMethods';
+import '/imports/api/methods/ItemsMethods';
 
 const insertPage = page => PageCollection.insert(page);
 const SEED_USERNAME = 'admin';

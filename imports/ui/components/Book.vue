@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { PageCollection } from "../../api/PageCollection";
+import { PageCollection } from "../../api/collections/PageCollection";
 import PageContent from "./PageContent.vue";
 import Pinboard from "./Pinboard.vue";
 export default {

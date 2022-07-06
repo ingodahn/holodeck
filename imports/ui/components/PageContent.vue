@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { PageCollection } from "../../api/PageCollection";
+import { PageCollection } from "../../api/collections/PageCollection";
 import ShowMathDoc from './ShowMathDoc.vue';
 import SageCell from './SageCell.vue';
 export default {

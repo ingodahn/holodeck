@@ -38,6 +38,7 @@
         @click="session.set('mode', 'admin', 'App')"
         >Tools</v-btn
       >
+      <div class="loading" v-if="!$subReady.AllItems">Loading...</div>
     </v-app-bar>
     <v-main>
       <Home v-if="session.mode == 'home'"></Home>
@@ -66,7 +67,7 @@
 //import Vue from "vue";
 import Home from "./components/Home.vue";
 import Book from "./components/Book.vue";
-import { PageCollection } from "../api/PageCollection";
+import { PageCollection } from "../api/collections/PageCollection";
 import Edit from "./components/Edit.vue";
 import Admin from "./components/Admin.vue";
 import LoginForm from "./components/LoginForm.vue";
@@ -151,13 +152,10 @@ export default {
       }
       return false;
     },
-    /*
     $subscribe: {
-      Items: [],
       Users: [],
       AllItems: [],
     },
-    */
   },
   watch: {
     sessionString(newSessionString) {
