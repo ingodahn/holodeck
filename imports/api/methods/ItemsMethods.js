@@ -6,7 +6,7 @@ Meteor.methods({
         if (!this.userId) {
             throw new Meteor.Error('Insert not authorized');
         }
-        const pattern = Match.ObjectIncluding({ type: Match.OneOf("book", "code-cell", "markdown-cell") });
+        const pattern = Match.ObjectIncluding({ type: Match.OneOf("book", "code-cell", "markdown-cell", "markdown") });
         var myTest = Match.test(item, pattern);
         if (myTest) {
             var newId = PageCollection.insert(item);
@@ -21,7 +21,7 @@ Meteor.methods({
         }
         const pattern = Match.ObjectIncluding({
             _id: String,
-            type: Match.OneOf("book", "code-cell", "markdown-cell")
+            type: Match.OneOf("book", "code-cell", "markdown-cell", "markdown")
         });
         var myTest = Match.test(item, pattern);
         if (myTest) {

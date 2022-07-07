@@ -7,36 +7,188 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-btn color="primary" class="mx-1 my-1" :disabled="!currentTitle"
-        >Edit this</v-btn
-      >
-      <v-btn color="success" class="mx-1 my-1">Add before</v-btn>
-      <v-btn color="success" class="mx-1 my-1">Add after</v-btn>
-      <v-btn color="warning" class="mx-1 my-1" :disabled="!pageObject"
-        >Delete</v-btn
-      >
+      <v-radio-group v-model="editMode" row>
+        <v-radio label="Edit this" value="editThis"></v-radio>
+        <v-radio label="New before" value="newBefore"></v-radio>
+        <v-radio label="New after" value="newAfter"></v-radio>
+      </v-radio-group>
+      <v-col>
+        <v-select
+          :items="pageTypes"
+          v-model="pageType"
+          label="Select page type"
+        ></v-select>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-btn color="success" @click="save">Save</v-btn>
+      </v-col>
+      <v-col>
+        <v-btn color="warning" @click="cancel">Cancel</v-btn>
+      </v-col>
+      <v-col>
+        <v-btn
+          color="warning"
+          class="mx-1 my-1"
+          :disabled="!pageObject"
+          @click="deleteThis"
+          >Delete</v-btn
+        >
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-text-field
+          label="Title"
+          hide-details="auto"
+          v-model="current.title"
+        ></v-text-field>
+        <v-textarea
+          outlined
+          label="Content:"
+          v-model="current.data"
+        ></v-textarea>
+      </v-col>
     </v-row>
   </div>
 </template>
 
 <script>
 import { PageCollection } from "../../api/collections/PageCollection";
+import { Random } from "meteor/random";
 
 export default {
   data() {
     return {
       session: this.$root.$data.session,
+      current: {
+        title: "",
+        data: "",
+      },
+      pageType: "markdown-cell",
+      pageTypes: [
+        { text: "HTML", value: "markdown-cell" },
+        { text: "Code", value: "code-cell" },
+        { text: "Markdown", value: "markdown" },
+      ],
+      editMode: null,
     };
+  },
+  mounted() {
+    if (this.pageObject) {
+      this.editMode = "editThis";
+    } else this.editMode = "newAfter";
+  },
+  watch: {
+    editMode(em) {
+      switch (em) {
+        case "editThis": {
+          console.log("Edit-87", this.pageObject);
+          this.current.title = this.pageObject.title;
+          this.pageType = this.pageObject.type;
+          this.current.data =
+            this.pageObject.type == "code-cell"
+              ? this.pageObject.script
+              : this.pageObject.data;
+          break;
+        }
+        default: {
+          this.current.title = "";
+          this.pageType = "markdown-cell";
+          this.current.data = "";
+        }
+      }
+    },
+  },
+  methods: {
+    cancel() {
+      this.session.set("mode", "book", "Edit");
+    },
+    save() {
+      if (this.editMode == "editThis") this.saveThis();
+      if (this.editMode == "newBefore") this.create(-1);
+      if (this.editMode == "newAfter") this.create(1);
+    },
+    saveThis() {
+      let d = { title: this.current.title, type: this.pageType };
+      if (this.pageType == "code-cell") {
+        d.script = this.current.data;
+        d.data = "<span></span>";
+      } else {
+        d.data = this.current.data;
+      }
+      d._id = this.pageObject._id;
+      Meteor.call("updateItem", d);
+      alert("Page updated. Re-visit page to update");
+      this.session.mode = "book";
+    },
+    
+    deleteThis() {
+      let books = PageCollection.find({ type: "book" }).fetch();
+      let id = this.pageObject._id;
+      books.forEach((b) => {
+        let i = b.pages.indexOf(id);
+        if (i > -1) {
+          console.log("Edit-115 Deleting from", b.title);
+          b.pages.splice(i, 1);
+          Meteor.call("updateItem", b);
+        }
+      });
+      Meteor.call("deleteItem", this.pageObject);
+      alert(
+        "Page deleted. User interface may be inconsistent - reset recommended."
+      );
+    },
+    create(delta) {
+      let d = { title: this.current.title, type: this.pageType };
+      if (this.pageType == "code-cell") {
+        d.script = this.current.data;
+        d.data = "";
+      }
+      if (this.pageType == "markdown-cell") {
+        d.data = this.current.data;
+      }
+      if (this.pageType == "markdown") {
+        d.data = this.current.data;
+      }
+      let id = Random.id([17]);
+      d._id = id;
+      let pid = parseInt(this.session.currentPage);
+      const pindex = pid ? pid : 0;
+      zindex = Math.min(
+        Math.max(0, pindex + delta - 1),
+        this.bookObject.pages.length
+      );
+      this.bookObject.pages.splice(zindex, 0, id);
+      console.log('Edit-164:',d)
+      Meteor.call("insertItem", d);
+      Meteor.call("updateItem", this.bookObject);
+      this.session.currentPage = zindex;
+      this.session.mode = "book";
+    },
   },
   computed: {
     pageObject() {
       if (this.bookObject.pages.length) {
         let pageId = this.bookObject.pages[this.session.currentPage - 1];
         if (pageId) {
-          return PageCollection.findOne({ _id: pageId });
+          let po = PageCollection.findOne({ _id: pageId });
+          if (po) return po;
+          else {
+            if (confirm("Page not found. Remove from book?")) {
+              this.bookObject.pages.splice(this.session.currentPage - 1, 1);
+              Meteor.call("updateItem", this.bookObject);
+              alert("Database has changed - Reset recommended");
+              this.session.mode = "book";
+            }
+          }
         }
       }
       return false;
+    },
+    currentTitle() {
+      return this.pageObject.title;
     },
   },
   meteor: {
@@ -47,3 +199,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+v-select {
+  max-width: 10;
+}
+</style>

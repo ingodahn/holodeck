@@ -2,6 +2,7 @@
     <div class = 'container'>
         <ShowMathDoc v-if="pageType == 'markdown-cell'" :content="getContent" :currentPage="currentPage"></ShowMathDoc>
         <SageCell v-else-if="pageType == 'code-cell'" :script="getCodeContent" :currentPage="currentPage" :pageId="pageId" @evaluated = "(id) => $emit('evaluated',id)"></SageCell>
+        <Markdown v-else-if="pageType == 'markdown'" :content="getContent" :currentPage="currentPage"></Markdown>
         <div v-else>Unknown Page Type {{ pageType }}</div>
     </div>
 </template>
@@ -10,6 +11,7 @@
 import { PageCollection } from "../../api/collections/PageCollection";
 import ShowMathDoc from './ShowMathDoc.vue';
 import SageCell from './SageCell.vue';
+import Markdown from './Markdown.vue';
 export default {
     props: {
         "pageId": {
@@ -21,7 +23,7 @@ export default {
         default: false
         }
     },
-    components: { ShowMathDoc, SageCell },
+    components: { ShowMathDoc, SageCell, Markdown },
     data () {
         return {
             session: this.$root.$data.session,
@@ -30,6 +32,7 @@ export default {
     computed: {
         getPage () {
             const page = PageCollection.findOne({_id: this.pageId});
+            console.log('PC-35:',page)
             return (page)?page:{type: 'markdown-cell',data: 'Page not found'};
         },
         getContent () {

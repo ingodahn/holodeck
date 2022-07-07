@@ -28,6 +28,7 @@
         color="success"
         class="mx-1 my-1"
         v-on:click="session.set('mode', 'edit', 'App')"
+        v-if="currentUser"
       >
         Edit
       </v-btn>

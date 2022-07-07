@@ -11,10 +11,18 @@ export default {
   components: {
     MarkdownItVueLight
   },
+  props: {
+    content: {
+      type: String,
+      default: "No markdown content given"
+    }
+  },
   data() {
     return {
-      content: '# your markdown content'
     }
+  },
+  mounted () {
+    console.log('Markdown component mounted')
   }
 }
 </script>
