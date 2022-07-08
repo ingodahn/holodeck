@@ -50,6 +50,7 @@
           >&gt;&gt;|</v-btn
         >
         <v-btn color='primary' @click="pageToPinboard()">To Pinboard</v-btn>
+        <v-btn color='primary' @click="session.sidebar=!session.sidebar">{{ sidebarLabel }}</v-btn>
       </v-col>
     </v-row>
     <v-row v-for="item in pageIds.pre" :key="item">
@@ -98,8 +99,9 @@ export default {
     },
     forwardOnePage () {
       this.session.set('currentPage',parseInt(this.session.currentPage)+1,'Book')
-    }
+    },
   },
+
   computed: {
     bookPageIds() {
       return this.bookObject.pages;
@@ -121,6 +123,9 @@ export default {
         if (i < this.bookObject.pages.length) postIds.push(this.bookPageIds[i]);
       }
       return { pre: preIds, cur: this.bookPageIds[cur], post: postIds };
+    },
+    sidebarLabel() {
+      return (this.session.sidebar)?'Hide Sidebar':'Show Sidebar';
     },
     
   },

@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar app>
+    <v-app-bar fixed app>
       <v-btn
         color="primary"
         class="mx-1 my-1"
@@ -93,6 +93,7 @@ export default {
         evaluated: new Set(),
         debug: true,
         saveSession: true,
+        sidebar: true,
         set(item, newValue, by = "anonymous") {
           if (this.debug)
             console.log("Session setting", item, "to", newValue, "by", by);
@@ -103,7 +104,10 @@ export default {
           this.bookId = "none";
           this.currentPage = 1;
           this.pre = -1;
-          (this.post = 0), (this.pinboard = []), (this.evaluated = new Set());
+          this.post = 0, 
+          this.pinboard = [],
+          this.sidebar = true;
+          this.evaluated = new Set();
           PageCollection.findOne({ type: "book", title: "|| Free Pages" })._id;
         },
       },

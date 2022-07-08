@@ -90,9 +90,9 @@ export default {
       if (!this.bookToDelete) return;
       const bookObject = PageCollection.findOne({_id: this.bookToDelete, type: 'book'})
       bookObject.pages.forEach(pid => {
-        PageCollection.remove({_id: pid})
+        Meteor.call('deleteItem',{_id: pid});
       });
-      PageCollection.remove({_id: bookObject._id});
+      Meteor.call('deleteItem',{_id: bookObject._id});
     },
     importbook() {
       if (!this.sessionFile) {
@@ -112,17 +112,19 @@ export default {
       bookData.data.forEach(element => {
         const pageId=Random.id([17]);
         element._id=pageId;
-        PageCollection.insert(element);
+        Meteor.call('insertItem', element);
         bookPages.push(pageId);
       });
-      PageCollection.insert(this.makeBookObject(bookData,bookPages));
-      let bo=PageCollection.find({type: 'book'}).fetch();
+      Meteor.call('insertItem',this.makeBookObject(bookData,bookPages));
     },
     clearPages (selection) {
+      Meteor.call('deleteItem',selection);
+      /*
       const myPages = PageCollection.find(selection).fetch(); 
-      myPages.forEach(e => PageCollection.remove({_id: e._id}));
+      myPages.forEach(e => Meteor.call('deleteItem',{_id: e._id}));
+      */
       alert("Clear of selected data completed");
-      if (!PageCollection.find({title: "|| Free Pages"})) PageCollection.insert({
+      if (!PageCollection.find({title: "|| Free Pages"})) Meteor.call('insertItem',{
                 type: 'book',
                 title: "|| Free Pages",
                 authors: 'Various Authors',
