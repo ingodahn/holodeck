@@ -1,25 +1,73 @@
 <template>
   <v-app>
     <v-app-bar fixed app>
+      <v-btn
+        color="primary"
+        class="mx-1 my-1"
+        @click="session.set('mode', 'home', 'App')"
+        >Home</v-btn
+      >
+      <v-btn
+        color="primary"
+        class="mx-1 my-1"
+        @click="session.set('mode', 'book', 'App')"
+        >Book</v-btn
+      >
+      <v-btn color="warning" class="mx-1 my-1" v-on:click="session.clear()">
+        Reset
+      </v-btn>
+      <v-btn
+        color="warning"
+        class="mx-1 my-1"
+        v-on:click="session.pinboard = []"
+        :disabled="session.pinboard.length == 0"
+      >
+        Clear Pinboard
+      </v-btn>
+      <v-btn
+        color="success"
+        class="mx-1 my-1"
+        v-on:click="session.set('mode', 'edit', 'App')"
+        v-if="currentUser"
+      >
+        Edit
+      </v-btn>
+      <v-btn
+        v-if="isAdmin"
+        color="warning"
+        class="mx-1 my-1"
+        @click="session.set('mode', 'admin', 'App')"
+        >Tools</v-btn
+      >
       <div class="loading" v-if="!$subReady.AllItems">Loading...</div>
-      <div v-else>
-        <mtMenu menuTitle="Home" :menuItems="homeMenuItems" v-on:menuSelected="gotoMenu" />
-        <router-link to="/">Go to Home</router-link>
-        <router-link to="/settings">Settings</router-link>
-      </div>
     </v-app-bar>
     <v-main>
-      <router-view></router-view>
+      <Home v-if="session.mode == 'home'"></Home>
+      <Book v-if="session.mode == 'book'"></Book>
+      <Edit v-if="session.mode == 'edit'"></Edit>
+      <Admin v-if="session.mode == 'admin'"></Admin>
+      <v-row v-if="session.mode == 'login'">
+          <LoginForm />
+      </v-row>
     </v-main>
+    <v-footer>
+      <v-btn class="mx-1" onclick="window.location.href='https://dahn-research.eu/impressum.htm'">Impressum</v-btn>
+      <v-btn class="mx-1" onclick="window.location.href='https://dahn-research.eu/privacy.htm'">Privacy</v-btn>
+  
+      <v-btn class="mx-1" color="primary" @click="logout" v-if="currentUser"
+        >Logout as {{ currentUser.username }}</v-btn
+      >
+      <v-btn class="mx-1" color="primary" @click="session.set('mode', 'login','App')" v-else
+        >Login as Author</v-btn
+      >
+    </v-footer>
   </v-app>
 </template>
 
 <script>
 //import Vue from "vue";
-import mtMenu from './components/MtMenu.vue';
 import Home from "./components/Home.vue";
 import Book from "./components/Book.vue";
-//import Settings from "./components/Settings.vue";
 import { PageCollection } from "../api/collections/PageCollection";
 import Edit from "./components/Edit.vue";
 import Admin from "./components/Admin.vue";
@@ -27,56 +75,46 @@ import LoginForm from "./components/LoginForm.vue";
 
 export default {
   components: {
-    mtMenu,
     Home,
-    //Settings,
     Book,
     Edit,
     Admin,
-    LoginForm,
+    LoginForm
   },
   data() {
     return {
       session: {
-        mode: "home",
-        books: {
-          //bookId: "none",
-          //currentPage: 1,
-        },
-        currentBook: null,
-        settings: {
-          pre: -1,
-          post: 0,
-          debug: true,
-        },
-        saveSession: true,
+        mode: "book",
+        bookId: "none",
+        currentPage: 1,
+        pre: -1,
+        post: 0,
         pinboard: [],
         evaluated: new Set(),
+        debug: true,
+        saveSession: true,
         sidebar: true,
         set(item, newValue, by = "anonymous") {
           if (this.debug)
             console.log("Session setting", item, "to", newValue, "by", by);
           this[item] = newValue;
         },
-        clear(dbid) {
-          this.mode = "home";
-          this.settings = {
-            pre: -1,
-            post: 0,
-            debug: true,
-          };
-          this.books = {};
-          this.currentBook = dbid;
-          this.books[dbid]=1;
-          (this.saveSession = true), (this.pinboard = []);
+        clear() {
+          this.mode = "book";
+          this.bookId = "none";
+          this.currentPage = 1;
+          this.pre = -1;
+          this.post = 0, 
+          this.pinboard = [],
           this.sidebar = true;
           this.evaluated = new Set();
+          PageCollection.findOne({ type: "book", title: "|| Free Pages" })._id;
         },
       },
     };
   },
   mounted() {
-    //this.resumeSession();
+    this.resumeSession();
   },
   methods: {
     resumeSession() {
@@ -101,28 +139,13 @@ export default {
     },
     logout() {
       Meteor.logout();
-      this.session.set("mode", "book", "App-logout");
+      this.session.set('mode',"book",'App-logout');
     },
-    gotoMenu (item) {
-      switch (item) {
-        case ('Settings'): {
-          this.$router.push('/settings');
-          break;
-        }
-        default: {
-          this.$router.push('/');
-        }
-      }
-
-    }
   },
   computed: {
     sessionString() {
       return JSON.stringify(this.session);
     },
-    homeMenuItems () {
-      return ['Library','Settings'];
-    }
   },
   meteor: {
     currentUser() {
