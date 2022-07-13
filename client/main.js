@@ -16,14 +16,17 @@ import '../imports/ui/plugins'
 import '/polyfills/router.js'
 
 import Home from "/imports/ui/components/Home.vue"
+import Library from "/imports/ui/components/Library.vue"
 import Book from "/imports/ui/components/Book.vue"
 import Settings from "/imports/ui/components/Settings.vue";
 
 const routes = [
   { path: '/', component: Home },
   { path: '/settings', component: Settings},
-  { path: '/read', component: Book }
-]
+  { path: '/library', component: Library},
+  { path: '/read', component: Book },
+  { path: '*', redirect: '/' }
+];
 
 const router = new VueRouter({
   routes // short for `routes: routes`

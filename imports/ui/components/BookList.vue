@@ -1,30 +1,8 @@
 <template>
   <v-row>
-    <!--
     <v-col>
-      {{myBooks.length}}
-      <ul>
-        <li v-for="(item,index) in myBooks" v-bind:key="index">
-        {{ item.title }}
-          <button color="primary" @click="toggleButton(index)"> {{ myBooks[index].opened }} </button>
-        </li>
-      </ul>
-      
-    </v-col>
-    -->
-    <v-col>
-      <!--
-      <ul>
-        <li v-for="(item,index) in myBooks" v-bind:key="index">
-          {{ item.title }} by {{ item.authors }} 
-          <v-btn color="success" @click="toggleButton(index)">
-               {{ myBooks[index].opened }}
-              </v-btn>
-        </li>
-      </ul>
-      -->
-      
-      <v-expansion-panels focusable>
+      <p v-if="books.length == 0">No books on list</p>
+      <v-expansion-panels v-else focusable>
         <v-expansion-panel v-for="(item,index) in myBooks" :key="index">
           <v-expansion-panel-header>
             <span><img :src="isOpen(item._id)" width="20px" height="20px"/></span><span> {{ item.title }} by {{ item.authors }}</span>
@@ -35,7 +13,7 @@
             <div>{{ item.description }}</div>
             <v-card-actions>
               <v-btn color="success" @click="toggleButton(index)">
-                {{ myBooks[index].opened }}
+                {{ bookLabels[index] }}
               </v-btn>
             </v-card-actions>
           </v-expansion-panel-content>
@@ -52,14 +30,22 @@ export default {
     return {
       session: this.$root.$data.session,
       myBooks: this.books,
+      bookLabels: []
     };
   },
   props: { books: { type: Array, } },
   mounted() {
+    this.updateBookLabels();
+  },
+  watch: {
+    myBooks() {
+      // this.updateBookLabels();
+    }
   },
   methods: {
     toggleButton (i) {
       let bi=this.myBooks[i];
+      /*
       if (bi.opened == "Open") {
         bi.opened = 'Close';
         this.openBook(bi._id)
@@ -68,6 +54,16 @@ export default {
         bi.opened = 'Open';
         this.closeBook(bi._id);
       }
+      */
+     if (this.openAt(bi._id)) {
+      //this.bookLabels[i] = 'Closed';
+      this.closeBook(bi._id);
+     }
+     else {
+      //this.bookLabels[i] = 'Open';
+      this.openBook(bi._id);
+     }
+      this.updateBookLabels()
     },
     
     openAt(bookId) {
@@ -77,12 +73,6 @@ export default {
       const base="https://api.mdisvg.com/v1/i/"
       const ic= (this.openAt(id))?'book-open-variant':'bookshelf';
       return base+ic;
-    },
-    bookAction(id) {
-      console.log("Booklist-42:", id, this.openAt(id));
-      if (this.openAt(id)) this.closeBook(id);
-      else this.openBook(id);
-      console.log('Booklist-47:',this.opened)
     },
     openBook(id) {
       console.log("Booklist-48: Opening", id);
@@ -98,12 +88,19 @@ export default {
         else this.session.currentBook = ok[0];
       }
     },
-    bookColor(i) {
-      if (!this.myBook) return "#FFFFFF";
-      return (this.myBook[i].opened=='Close')?"#C6F68D":"#FFFFFF";
+    
+    updateBookLabels () {
+      let allIds=[]
+      this.myBooks.forEach(b => {allIds.push(b._id)});
+      let allLabels=[];
+      allIds.forEach(ll => {allLabels.push((this.openAt(ll))?'Close':'Open')});
+      console.log('Booklist-116:',allLabels);
+      this.bookLabels = allLabels;
     }
+    
   },
   computed: {
+    
   },
   meteor: {
   },

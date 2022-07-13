@@ -3,7 +3,11 @@
     <v-app-bar fixed app>
       <div class="loading" v-if="!$subReady.AllItems">Loading...</div>
       <div v-else>
-        <mtMenu menuTitle="Home" :menuItems="homeMenuItems" v-on:menuSelected="gotoMenu" />
+        <mtMenu
+          menuTitle="Home"
+          :menuItems="homeMenuItems"
+          v-on:menuSelected="gotoMenu"
+        />
         <router-link to="/">Go to Home</router-link>
         <router-link to="/settings">Settings</router-link>
       </div>
@@ -16,8 +20,8 @@
 
 <script>
 //import Vue from "vue";
-import mtMenu from './components/MtMenu.vue';
-import Home from "./components/Home.vue";
+import mtMenu from "./components/MtMenu.vue";
+import Home from "./components/Library.vue";
 import Book from "./components/Book.vue";
 //import Settings from "./components/Settings.vue";
 import { PageCollection } from "../api/collections/PageCollection";
@@ -67,12 +71,13 @@ export default {
           };
           this.books = {};
           this.currentBook = dbid;
-          this.books[dbid]=1;
+          this.books[dbid] = 1;
           (this.saveSession = true), (this.pinboard = []);
           this.sidebar = true;
           this.evaluated = new Set();
         },
       },
+      homeMenuItems: ["Home", "Library", "Settings"]
     };
   },
   mounted() {
@@ -103,26 +108,33 @@ export default {
       Meteor.logout();
       this.session.set("mode", "book", "App-logout");
     },
-    gotoMenu (item) {
+    gotoMenu(item) {
       switch (item) {
-        case ('Settings'): {
-          this.$router.push('/settings');
+        case "Settings": {
+          this.$router.push("/settings");
+          break;
+        }
+        case "Library": {
+          this.$router.push("/library");
+          break;
+        }
+        case "Home": {
+          this.$router.push("/");
           break;
         }
         default: {
-          this.$router.push('/');
+          this.$router.push("/");
         }
       }
-
-    }
+    },
   },
   computed: {
     sessionString() {
       return JSON.stringify(this.session);
     },
-    homeMenuItems () {
-      return ['Library','Settings'];
-    }
+    homeMenuItemsX() {
+      return ["Library", "Settings"];
+    },
   },
   meteor: {
     currentUser() {

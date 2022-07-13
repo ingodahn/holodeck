@@ -24,7 +24,8 @@
     </v-row>
     <v-row>
       <v-col>
-        Booklist
+        <h2>Open Books</h2>
+        <BookList :books="selectedBooks"></BookList>
       </v-col>
     </v-row>
     <v-row
@@ -37,6 +38,8 @@
 
 <script>
 import { PageCollection } from "../../api/collections/PageCollection";
+import BookList from './BookList.vue';
+
 export default {
   data() {
     return {
@@ -57,7 +60,7 @@ export default {
       ],
     };
   },
-  components: {},
+  components: { BookList },
   methods: {
     reset() {
       if (
@@ -74,6 +77,12 @@ export default {
       return PageCollection.findOne({ type: "book", title: "|| Free Pages" })
         ._id;
     },
+    selectedBooks () {
+      let selIds = Object.keys(this.session.books)
+      console.log('Settings-82:',selIds)
+      console.log('Settings-83:',PageCollection.find({_id: selIds}).fetch().length)
+      return PageCollection.find({_id: {$in:selIds}}).fetch()
+    }
   },
 };
 </script>
