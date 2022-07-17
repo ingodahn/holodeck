@@ -1,5 +1,5 @@
 <template>
-    <v-menu open-on-hover offset-y>
+    <v-menu open-on-hover offset-y :disabled="menuItems.length == 0">
         <!-- preserved as template for later use -->-->
         <template v-slot:activator="{ on, attrs }">
           <v-btn color="primary" class="mx-1 my-1" v-bind="attrs" v-on="on"> {{ menuTitle }} </v-btn>

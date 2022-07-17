@@ -50,7 +50,6 @@ export default {
   computed: {
     getPage() {
       const page = PageCollection.findOne({ _id: this.pageId });
-      console.log("PC-35:", page);
       return page ? page : { type: "markdown-cell", data: "Page not found" };
     },
     getContent() {

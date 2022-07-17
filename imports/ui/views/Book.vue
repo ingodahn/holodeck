@@ -1,0 +1,87 @@
+<template>
+  <div class="container">
+    <MtNavigation/>
+    <v-main>
+    <v-row v-for="item in pageIds.pre" :key="item">
+      <v-col>
+        <page-content :pageId="item"></page-content>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <page-content :pageId="pageIds.cur" currentPage></page-content>
+      </v-col>
+    </v-row>
+    <v-row v-for="item in pageIds.post" :key="item">
+      <v-col>
+        <page-content :pageId="item"></page-content>
+      </v-col>
+    </v-row>
+    </v-main>
+  </div>
+</template>
+
+<script>
+import { PageCollection } from "../../api/collections/PageCollection";
+import PageContent from "../components/PageContent.vue";
+import Pinboard from "./Pinboard.vue";
+import MtNavigation from "../components/MtNavigation.vue";
+export default {
+  mounted() {
+    this.bookId=this.$route.params.bookId;
+    this.session.currentBook=this.bookId;
+    this.pageIndex=parseInt(this.$route.params.pageIndex)
+    this.session.currentPage=(this.pageIndex)?this.pageIndex:1;
+    console.log('Book-32:',this.session.currentBook,this.session.currentPage);
+  },
+  data() {
+    return {
+      session: this.$root.$data.session,
+      bookId: '',
+      pageIndex: 0,
+      selectPage: false,
+      
+    };
+  },
+
+  components: { PageContent, Pinboard, MtNavigation },
+  methods: {
+  },
+
+  computed: {
+    bookPageIds() {
+      return this.bookObject.pages;
+    },
+    pageIds() {
+      let cur0 = this.pageIndex,
+        //cur0 = this.session.books[this.bookId],
+        pre0 = this.session.settings.pre,
+        post0 = this.session.settings.post;
+      let cur = cur0 < 1 ? 1 : cur0 - 1;
+      let preIds = [],
+        postIds = [],
+        preMin = pre0 > 0 ? cur0 : cur + pre0,
+        postMax = post0 < 0 ? cur0 : cur0 + post0;
+      for (let i = preMin; i < cur; i++) {
+        if (i >= 0) preIds.push(this.bookPageIds[i]);
+      }
+      for (let i = cur + 1; i < postMax; i++) {
+        if (i < this.bookObject.pages.length) postIds.push(this.bookPageIds[i]);
+      }
+      return { pre: preIds, cur: this.bookPageIds[cur], post: postIds };
+    },
+    sidebarLabel() {
+      return this.session.sidebar ? "Hide Sidebar" : "Show Sidebar";
+    },
+  },
+  meteor: {
+    bookObject() {
+      const bo = PageCollection.findOne({ _id: this.bookId });
+      return bo ? bo : { title: "No Book Found", pages: [] };
+    },
+  },
+};
+</script>
+
+<style scoped>
+</style>

@@ -15,16 +15,19 @@ Vue.use(Vuetify); // this is all you need for Vuetify 1.x
 import '../imports/ui/plugins'
 import '/polyfills/router.js'
 
-import Home from "/imports/ui/components/Home.vue"
-import Library from "/imports/ui/components/Library.vue"
-import Book from "/imports/ui/components/Book.vue"
-import Settings from "/imports/ui/components/Settings.vue";
+import Home from "/imports/ui/views/Home.vue"
+import Library from "/imports/ui/views/Library.vue"
+import Book from "/imports/ui/views/Book.vue"
+import Pinboard from "/imports/ui/views/Pinboard.vue"
+import Settings from "/imports/ui/views/Settings.vue";
 
 const routes = [
   { path: '/', component: Home },
   { path: '/settings', component: Settings},
   { path: '/library', component: Library},
-  { path: '/read', component: Book },
+  { path: '/read/:bookId/:pageIndex', component: Book},
+  { path: '/read/:bookId', component: Book },
+  { path: '/pinboard', component: Pinboard},
   { path: '*', redirect: '/' }
 ];
 

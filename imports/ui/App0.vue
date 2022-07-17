@@ -66,8 +66,8 @@
 
 <script>
 //import Vue from "vue";
-import Home from "./components/Home.vue";
-import Book from "./components/Book.vue";
+import Home from "./views/Home.vue";
+import Book from "./views/Book.vue";
 import { PageCollection } from "../api/collections/PageCollection";
 import Edit from "./components/Edit.vue";
 import Admin from "./components/Admin.vue";
@@ -86,7 +86,6 @@ export default {
       session: {
         mode: "book",
         bookId: "none",
-        currentPage: 1,
         pre: -1,
         post: 0,
         pinboard: [],
@@ -123,6 +122,7 @@ export default {
         this.session.set("saveSession", false);
         this.session.mode = "book";
         let newSession = JSON.parse(savedSession);
+        console.log('App-125:',newSession);
         for (let k of Object.keys(newSession)) {
           if (
             k != "debug" &&

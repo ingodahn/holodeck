@@ -1,43 +1,27 @@
 <template>
   <v-app>
-    <v-app-bar fixed app>
-      <div class="loading" v-if="!$subReady.AllItems">Loading...</div>
-      <div v-else>
-        <mtMenu
-          menuTitle="Home"
-          :menuItems="homeMenuItems"
-          v-on:menuSelected="gotoMenu"
-        />
-        <router-link to="/">Go to Home</router-link>
-        <router-link to="/settings">Settings</router-link>
-      </div>
-    </v-app-bar>
-    <v-main>
-      <router-view></router-view>
-    </v-main>
+      <router-view :key="$route.fullPath"></router-view>
   </v-app>
 </template>
 
 <script>
-//import Vue from "vue";
-import mtMenu from "./components/MtMenu.vue";
-import Home from "./components/Library.vue";
-import Book from "./components/Book.vue";
-//import Settings from "./components/Settings.vue";
+/*
+import MtNavigation from './components/MtNavigation.vue';
+import Home from "./views/Library.vue";
+import Book from "./views/Book.vue";
 import { PageCollection } from "../api/collections/PageCollection";
 import Edit from "./components/Edit.vue";
 import Admin from "./components/Admin.vue";
 import LoginForm from "./components/LoginForm.vue";
-
+*/
 export default {
   components: {
-    mtMenu,
-    Home,
-    //Settings,
-    Book,
-    Edit,
-    Admin,
-    LoginForm,
+    //MtNavigation,
+    //Home,
+    //Book,
+    //Edit,
+    //Admin,
+    //LoginForm,
   },
   data() {
     return {
@@ -72,16 +56,29 @@ export default {
           this.books = {};
           this.currentBook = dbid;
           this.books[dbid] = 1;
-          (this.saveSession = true), (this.pinboard = []);
+          this.saveSession = true;
+          this.pinboard = [];
           this.sidebar = true;
           this.evaluated = new Set();
         },
+        currentPage() {
+          if (this.currentBook && this.books[this.currentBook]) {
+            return this.books[this.currentBook]
+          } else return 0;
+        },
+        setCurrentPage(n) {
+          if (this.currentBook) {
+            this.books[this.currentBook]=n;
+          }
+        }
       },
       homeMenuItems: ["Home", "Library", "Settings"]
     };
   },
   mounted() {
-    //this.resumeSession();
+    this.resumeSession();
+  },
+  watch: {
   },
   methods: {
     resumeSession() {
@@ -127,13 +124,13 @@ export default {
         }
       }
     },
+    gotoRead () {
+      this.$router.push('/read/'+this.session.currentBook);
+    }
   },
   computed: {
     sessionString() {
       return JSON.stringify(this.session);
-    },
-    homeMenuItemsX() {
-      return ["Library", "Settings"];
     },
   },
   meteor: {
