@@ -71,7 +71,7 @@ import Book from "./views/Book.vue";
 import { PageCollection } from "../api/collections/PageCollection";
 import Edit from "./components/Edit.vue";
 import Admin from "./components/Admin.vue";
-import LoginForm from "./components/LoginForm.vue";
+import LoginForm from "./views/LoginForm.vue";
 
 export default {
   components: {

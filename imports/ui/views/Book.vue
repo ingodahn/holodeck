@@ -1,22 +1,25 @@
 <template>
   <div class="container">
-    <MtNavigation/>
     <v-main>
-    <v-row v-for="item in pageIds.pre" :key="item">
-      <v-col>
-        <page-content :pageId="item"></page-content>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col>
-        <page-content :pageId="pageIds.cur" currentPage></page-content>
-      </v-col>
-    </v-row>
-    <v-row v-for="item in pageIds.post" :key="item">
-      <v-col>
-        <page-content :pageId="item"></page-content>
-      </v-col>
-    </v-row>
+      <v-row v-for="item in pageIds.pre" :key="item">
+        <v-col>
+          <page-content :pageId="item"></page-content>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <page-content
+            :pageId="pageIds.cur"
+            currentPage
+            ref="currentPage"
+          ></page-content>
+        </v-col>
+      </v-row>
+      <v-row v-for="item in pageIds.post" :key="item">
+        <v-col>
+          <page-content :pageId="item"></page-content>
+        </v-col>
+      </v-row>
     </v-main>
   </div>
 </template>
@@ -24,27 +27,24 @@
 <script>
 import { PageCollection } from "../../api/collections/PageCollection";
 import PageContent from "../components/PageContent.vue";
-import Pinboard from "./Pinboard.vue";
-import MtNavigation from "../components/MtNavigation.vue";
+
 export default {
   mounted() {
-    this.bookId=this.$route.params.bookId;
-    this.session.currentBook=this.bookId;
-    this.pageIndex=parseInt(this.$route.params.pageIndex)
-    this.session.currentPage=(this.pageIndex)?this.pageIndex:1;
-    console.log('Book-32:',this.session.currentBook,this.session.currentPage);
+    this.bookId = this.$route.params.bookId;
+    this.session.currentBook = this.bookId;
+    this.pageIndex = parseInt(this.$route.params.pageIndex);
+    this.session.currentPage = this.pageIndex ? this.pageIndex : 1;
   },
   data() {
     return {
       session: this.$root.$data.session,
-      bookId: '',
+      bookId: "",
       pageIndex: 0,
       selectPage: false,
-      
     };
   },
 
-  components: { PageContent, Pinboard, MtNavigation },
+  components: { PageContent },
   methods: {
   },
 

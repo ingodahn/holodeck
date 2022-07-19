@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <MtNavigation />
     <v-main>
       <v-row>
         <h2>Settings</h2>
@@ -42,7 +41,6 @@
 <script>
 import { PageCollection } from "../../api/collections/PageCollection";
 import BookList from "../components/BookList.vue";
-import MtNavigation from "../components/MtNavigation.vue";
 
 export default {
   data() {
@@ -64,7 +62,7 @@ export default {
       ],
     };
   },
-  components: { BookList, MtNavigation },
+  components: { BookList },
   methods: {
     reset() {
       if (

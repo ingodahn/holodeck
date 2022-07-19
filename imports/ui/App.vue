@@ -1,31 +1,30 @@
 <template>
   <v-app>
-      <router-view :key="$route.fullPath"></router-view>
+    <MtNavigation/>
+    <router-view :key="$route.fullPath"></router-view>
+    <v-footer app bottom fixed padless>
+      <v-btn
+        class="mx-1"
+        onclick="window.location.href='https://dahn-research.eu/impressum.htm'"
+        >Impressum</v-btn
+      >
+      <v-btn
+        class="mx-1"
+        onclick="window.location.href='https://dahn-research.eu/privacy.htm'"
+        >Privacy</v-btn
+      >
+    </v-footer>
   </v-app>
 </template>
 
 <script>
-/*
 import MtNavigation from './components/MtNavigation.vue';
-import Home from "./views/Library.vue";
-import Book from "./views/Book.vue";
-import { PageCollection } from "../api/collections/PageCollection";
-import Edit from "./components/Edit.vue";
-import Admin from "./components/Admin.vue";
-import LoginForm from "./components/LoginForm.vue";
-*/
 export default {
-  components: {
-    //MtNavigation,
-    //Home,
-    //Book,
-    //Edit,
-    //Admin,
-    //LoginForm,
-  },
+  components: { MtNavigation },
   data() {
     return {
       session: {
+        //drawer: true,
         mode: "home",
         books: {
           //bookId: "none",
@@ -63,23 +62,22 @@ export default {
         },
         currentPage() {
           if (this.currentBook && this.books[this.currentBook]) {
-            return this.books[this.currentBook]
+            return this.books[this.currentBook];
           } else return 0;
         },
         setCurrentPage(n) {
           if (this.currentBook) {
-            this.books[this.currentBook]=n;
+            this.books[this.currentBook] = n;
           }
-        }
+        },
       },
-      homeMenuItems: ["Home", "Library", "Settings"]
+      homeMenuItems: ["Home", "Library", "Settings"],
     };
   },
   mounted() {
     this.resumeSession();
   },
-  watch: {
-  },
+  watch: {},
   methods: {
     resumeSession() {
       let savedSession = localStorage.getItem("mtHolodeckSession");
@@ -97,36 +95,17 @@ export default {
             this.session.set(k, newSession[k], "Book resume");
         }
         this.session.saveSession = true;
+        let cp = this.session.currentPage;
+        if (cp) {
+          this.$router.push('/read/'+this.session.currentBook+'/'+cp.toString());
+        } else {
+          this.session.currentBook == null;
+          this.$router.push('/');
+        }
       } else {
         alert("No session yet");
       }
     },
-    logout() {
-      Meteor.logout();
-      this.session.set("mode", "book", "App-logout");
-    },
-    gotoMenu(item) {
-      switch (item) {
-        case "Settings": {
-          this.$router.push("/settings");
-          break;
-        }
-        case "Library": {
-          this.$router.push("/library");
-          break;
-        }
-        case "Home": {
-          this.$router.push("/");
-          break;
-        }
-        default: {
-          this.$router.push("/");
-        }
-      }
-    },
-    gotoRead () {
-      this.$router.push('/read/'+this.session.currentBook);
-    }
   },
   computed: {
     sessionString() {
@@ -134,15 +113,6 @@ export default {
     },
   },
   meteor: {
-    currentUser() {
-      return Meteor.user();
-    },
-    isAdmin() {
-      if (this.currentUser) {
-        return this.currentUser.username === "admin";
-      }
-      return false;
-    },
     $subscribe: {
       Users: [],
       AllItems: [],

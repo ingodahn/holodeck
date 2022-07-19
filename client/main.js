@@ -18,6 +18,7 @@ import '/polyfills/router.js'
 import Home from "/imports/ui/views/Home.vue"
 import Library from "/imports/ui/views/Library.vue"
 import Book from "/imports/ui/views/Book.vue"
+import LoginForm from "/imports/ui/views/LoginForm.vue";
 import Pinboard from "/imports/ui/views/Pinboard.vue"
 import Settings from "/imports/ui/views/Settings.vue";
 
@@ -27,6 +28,7 @@ const routes = [
   { path: '/library', component: Library},
   { path: '/read/:bookId/:pageIndex', component: Book},
   { path: '/read/:bookId', component: Book },
+  { path: '/login',component: LoginForm},
   { path: '/pinboard', component: Pinboard},
   { path: '*', redirect: '/' }
 ];

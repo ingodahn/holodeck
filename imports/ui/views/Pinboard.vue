@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <MtNavigation />
     <v-main>
       <v-row v-if="items.length == 0">
         <v-col>
@@ -19,19 +18,23 @@
                 ><v-icon>mdi-page-next-outline</v-icon></v-btn
               >
               <v-btn icon title="Remove from pinboard" @click="remove(i)"
-                ><v-icon>mdi-pin-off-outline</v-icon></v-btn
-              >
+                ><v-icon>mdi-pin-off-outline</v-icon>
+              </v-btn>
             </v-card-actions>
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
+      <router-link
+        to="/pinboard?deck=secondary"
+        target="_blank"
+        title="Open pinboard on new deck"
+        ><v-icon>mdi-new-box</v-icon></router-link
+      >
     </v-main>
   </div>
 </template>
 
 <script>
-import MtMenu from "../components/MtMenu.vue";
-import MtNavigation from "../components/MtNavigation.vue";
 export default {
   data() {
     return {
@@ -42,7 +45,7 @@ export default {
   methods: {
     goto(i) {
       this.session.books[this.items[i].bookId] = this.items[i].pageNr;
-      this.$router.push("/read/" + this.items[i].bookId);
+      this.$router.push("/read/" + this.items[i].bookId+"/"+this.items[i].pageNr);
     },
     remove(i) {
       this.session.pinboard.splice(i, 1);
@@ -53,6 +56,6 @@ export default {
       return this.session.pinboard;
     },
   },
-  components: { MtMenu, MtNavigation },
+  components: { },
 };
 </script>

@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <MtNavigation />
     <v-main>
       <v-row>
         <v-col>
@@ -16,7 +15,6 @@
 <script>
 import { PageCollection } from "../../api/collections/PageCollection";
 import BookList from "../components/BookList.vue";
-import MtNavigation from "../components/MtNavigation.vue";
 
 export default {
   data() {
@@ -24,7 +22,7 @@ export default {
       session: this.$root.$data.session,
     };
   },
-  components: { MtNavigation, BookList },
+  components: { BookList },
   methods: {},
   computed: {},
   meteor: {
