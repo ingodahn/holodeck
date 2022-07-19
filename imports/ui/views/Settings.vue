@@ -23,15 +23,9 @@
           />
         </v-col>
       </v-row>
-      <v-row>
-        <v-col>
-          <h2>Open Books</h2>
-          <BookList :books="selectedBooks"></BookList>
-        </v-col>
-      </v-row>
       <v-row
         ><v-col md="auto">
-          <v-btn color="warning" @click="reset">Reset</v-btn>
+          <v-btn color="warning" @click="reset">Reset All</v-btn>
         </v-col>
       </v-row>
     </v-main>
@@ -40,7 +34,6 @@
 
 <script>
 import { PageCollection } from "../../api/collections/PageCollection";
-import BookList from "../components/BookList.vue";
 
 export default {
   data() {
@@ -62,12 +55,12 @@ export default {
       ],
     };
   },
-  components: { BookList },
+  components: { },
   methods: {
     reset() {
       if (
         confirm(
-          "Are you sure you would like to to clear all settings, including your pinboard and book selections?"
+          "Are you sure you would like to clear all settings, including your pinboard and book selections?"
         )
       ) {
         this.session.clear(this.defaultBookId);
