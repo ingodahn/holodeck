@@ -73,7 +73,6 @@ export default {
       return this.openAt(id) ? "mdi-book-open-variant" : "mdi-bookshelf";
     },
     openBook(id) {
-      console.log('Booklist-72: Opening',id)
       this.session.books[id] = 1;
       //this.session.set("currentBook", id, "BookList");
     },

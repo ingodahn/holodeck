@@ -20,16 +20,22 @@ import Library from "/imports/ui/views/Library.vue"
 import Book from "/imports/ui/views/Book.vue"
 import LoginForm from "/imports/ui/views/LoginForm.vue";
 import Pinboard from "/imports/ui/views/Pinboard.vue"
+import Admin from "/imports/ui/views/Admin.vue"
+import Opened from "/imports/ui/views/Opened.vue"
+import Edit from "/imports/ui/views/Edit.vue"
 import Settings from "/imports/ui/views/Settings.vue";
 
 const routes = [
   { path: '/', component: Home },
   { path: '/settings', component: Settings},
   { path: '/library', component: Library},
+  { path: '/opened', component: Opened},
   { path: '/read/:bookId/:pageIndex', component: Book},
   { path: '/read/:bookId', component: Book },
   { path: '/login',component: LoginForm},
   { path: '/pinboard', component: Pinboard},
+  { path: '/admin', component: Admin},
+  { path: '/edit', component: Edit},
   { path: '*', redirect: '/' }
 ];
 

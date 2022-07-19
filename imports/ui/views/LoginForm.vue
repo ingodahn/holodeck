@@ -54,7 +54,6 @@ export default {
   components: { },
   methods: {
     handleSubmit(event) {
-      console.log("Login-46: submitted");
       Meteor.loginWithPassword(this.username, this.password, (err) => {
         if (err) alert(err);
         this.session.set("mode", "book", "App-login");

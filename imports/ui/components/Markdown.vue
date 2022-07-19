@@ -22,7 +22,6 @@ export default {
     }
   },
   mounted () {
-    console.log('Markdown component mounted')
   }
 }
 </script>

@@ -84,7 +84,6 @@ export default {
     editMode(em) {
       switch (em) {
         case "editThis": {
-          console.log("Edit-87", this.pageObject);
           this.current.title = this.pageObject.title;
           this.pageType = this.pageObject.type;
           this.current.data =
@@ -103,7 +102,7 @@ export default {
   },
   methods: {
     cancel() {
-      this.session.set("mode", "book", "Edit");
+      this.$router.back();
     },
     save() {
       if (this.editMode == "editThis") this.saveThis();
@@ -130,7 +129,6 @@ export default {
       books.forEach((b) => {
         let i = b.pages.indexOf(id);
         if (i > -1) {
-          console.log("Edit-115 Deleting from", b.title);
           b.pages.splice(i, 1);
           Meteor.call("updateItem", b);
         }
@@ -161,7 +159,6 @@ export default {
         this.bookObject.pages.length
       );
       this.bookObject.pages.splice(zindex, 0, id);
-      console.log('Edit-164:',d)
       Meteor.call("insertItem", d);
       Meteor.call("updateItem", this.bookObject);
       this.session.currentPage = zindex;
@@ -193,7 +190,7 @@ export default {
   },
   meteor: {
     bookObject() {
-      const bo = PageCollection.findOne({ _id: this.session.bookId });
+      const bo = PageCollection.findOne({ _id: this.session.currentBook });
       return bo ? bo : { title: "No Book Found", pages: [] };
     },
   },

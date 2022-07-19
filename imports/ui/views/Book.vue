@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <v-main>
+      <div v-if="this.bookObject.pages.length != 0">
       <v-row v-for="item in pageIds.pre" :key="item">
         <v-col>
           <page-content :pageId="item"></page-content>
@@ -20,6 +21,8 @@
           <page-content :pageId="item"></page-content>
         </v-col>
       </v-row>
+      </div>
+      <div v-else>No pages to show. Please open a book from the library.</div>
     </v-main>
   </div>
 </template>
@@ -50,7 +53,7 @@ export default {
 
   computed: {
     bookPageIds() {
-      return this.bookObject.pages;
+      return (this.bookObject.pages.length)?this.bookObject.pages:[];
     },
     pageIds() {
       let cur0 = this.pageIndex,

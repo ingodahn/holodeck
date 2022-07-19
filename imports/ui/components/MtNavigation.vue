@@ -2,11 +2,10 @@
   <div class="container">
     <v-app-bar fixed app dense>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <template v-if="session.currentBook">
+      <template v-if="allSet">
         <v-icon title="Temporary deck" v-if="isSecondary"
           >mdi-content-save-off</v-icon
         >
-
         &nbsp;
         <v-toolbar-title>{{ bookObject.title }}</v-toolbar-title>
         <v-spacer></v-spacer>
@@ -62,9 +61,13 @@
         <v-btn icon @click="pageToPinboard()" title="To pinboard">
           <v-icon>mdi-pin-outline</v-icon>
         </v-btn>
+        <v-btn icon @click="gotoPath('/edit')" v-if="currentUser" title="Edit">
+          <v-icon>mdi-pencil-outline</v-icon>
+        </v-btn>
       </template>
       <v-app-bar-title v-else>MathTrek Holodeck</v-app-bar-title>
     </v-app-bar>
+
     <v-navigation-drawer v-model="drawer" temporary fixed>
       <v-list nav dense>
         <v-list-item link @click="gotoPath('/')">
@@ -72,6 +75,12 @@
             <v-icon>mdi-home</v-icon>
           </v-list-item-icon>
           <v-list-item-title>Home</v-list-item-title>
+        </v-list-item>
+        <v-list-item link @click="gotoPath('/opened')">
+          <v-list-item-icon>
+            <v-icon>mdi-book-open-variant</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Open books</v-list-item-title>
         </v-list-item>
         <v-list-item link @click="gotoPath('/library')">
           <v-list-item-icon>
@@ -105,6 +114,12 @@
             >Sign out as {{ currentUser.username }}</v-list-item-title
           >
         </v-list-item>
+        <v-list-item @click="gotoPath('/admin')" v-if="isAdmin">
+          <v-list-item-icon>
+            <v-icon>mdi-hammer-screwdriver</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Admin Tools</v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
   </div>
@@ -135,8 +150,7 @@ export default {
     if (this.$route.query.deck == "secondary") {
       this.session.set("saveSession", false);
       this.isSecondary = true;
-      console.log("Nav-119: Set to unsave");
-    } else console.log("Nav-119: Save unchanged");
+    }
   },
   methods: {
     gotoPage(nr) {
@@ -144,14 +158,12 @@ export default {
       this.gotoPath(path);
     },
     gotoPath(path) {
-      console.log("Nav-85:", path);
       this.$router.push(path);
       this.drawer = false;
     },
     forwardOnePage() {
       if (this.currentPage < this.bookObject.pages.length) {
         let pi = this.currentPage + 1;
-        console.log("Nav-122:", pi);
         this.gotoPage(pi);
       }
     },
@@ -159,7 +171,7 @@ export default {
       if (this.session.currentPage > 1) this.session.currentPage--;
     },
     toCurrentPage() {
-      let mp=document.getElementsByClassName("currentPage")[0];
+      let mp = document.getElementsByClassName("currentPage")[0];
       if (!mp && this.currentPage) this.gotoPage(this.currentPage);
       else mp.scrollIntoView(false);
     },
@@ -191,7 +203,6 @@ export default {
       for (let i = 1; i <= this.bookPageIds.length; i++) {
         selPages.push({ text: "Page " + i.toString(), value: i });
       }
-      console.log("Nav-170:", selPages);
       return selPages;
     },
     bookPageIds() {
@@ -217,6 +228,11 @@ export default {
       }
       return { pre: preIds, cur: this.bookPageIds[cur], post: postIds };
     },
+    allSet () {
+      if (! this.session.currentBook || this.session.currentBook == 'null') return false;
+      if (!this.session.books[this.session.currentBook]) this.session.books[this.session.currentBook]= 1;
+      return true;
+    }
   },
   meteor: {
     bookObject() {
