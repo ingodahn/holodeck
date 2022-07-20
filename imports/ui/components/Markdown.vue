@@ -1,15 +1,16 @@
 <template>
   <div>
-    <markdown-it-vue-light class="md-body" :content="content" />
+    <VueShowdown :markdown="content" flavor="github"
+  />
   </div>
 </template>
 
 <script>
-import MarkdownItVueLight from 'markdown-it-vue/dist/markdown-it-vue-light.umd.min.js'
-import 'markdown-it-vue/dist/markdown-it-vue-light.css'
+import { VueShowdown } from 'vue-showdown';
+
 export default {
   components: {
-    MarkdownItVueLight
+    VueShowdown
   },
   props: {
     content: {
@@ -21,7 +22,21 @@ export default {
     return {
     }
   },
-  mounted () {
-  }
+  mounted: function () {
+    renderMathInElement(document.body, {
+      // customised options
+      // • auto-render specific keys, e.g.:
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      // • rendering keys, e.g.:
+      throwOnError: false,
+    });
+
+    //MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+  },
 }
 </script>
