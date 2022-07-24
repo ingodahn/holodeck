@@ -14,6 +14,13 @@
           :pageId="pageId"
           @evaluated="(id) => $emit('evaluated', id)"
         ></SageCell>
+        <SageCell
+          v-else-if="pageType == 'code'"
+          :script="getContent"
+          :currentPage="currentPage"
+          :pageId="pageId"
+          @evaluated="(id) => $emit('evaluated', id)"
+        ></SageCell>
         <Markdown
           v-else-if="pageType == 'markdown'"
           :content="getContent"
