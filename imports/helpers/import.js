@@ -6,7 +6,8 @@ let cellData = [].map.call(cells, cell => {
     let cj = {
         data: "no data found in this page",
         name: 'lions-hopf-' + count.toString,
-        title: "no title given for this page"
+        title: "no title given for this page",
+        level: 0
     }
     if (cell.classList.contains("nb-code-cell")) {
         cj.data = cell.innerHTML;
@@ -17,6 +18,11 @@ let cellData = [].map.call(cells, cell => {
     }
     if (cell.classList.contains("nb-markdown-cell")) {
         cj.data = cell.innerHTML;
+        let re=/<h(\d)/;
+      if (re.exec(cj.data)) {
+        //console.log(parseInt(re.exec(data)[1]), 'from h')
+        cj.level = parseInt(re.exec(cj.data)[1]);
+      }
         cj.type = 'markdown-cell';
         let dataText=cell.textContent.replace(/(\s\s+)/gm, "");
         cj.title = dataText.split(' ').slice(0,4).join(' ');

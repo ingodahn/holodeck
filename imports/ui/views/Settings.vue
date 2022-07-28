@@ -23,6 +23,17 @@
           />
         </v-col>
       </v-row>
+      <v-row>
+        <v-col md="auto">
+          <v-select
+            class="select"
+            v-model="session.tocLevel"
+            :items="tocLevelItems"
+            label="Use table of contents up to level"
+          />
+          <p><em>All</em> lists all pages.</p>
+        </v-col>
+      </v-row>
       <v-row
         ><v-col md="auto">
           <v-btn color="warning" @click="reset">Reset All</v-btn>
@@ -51,6 +62,13 @@ export default {
         { text: "1", value: 1 },
         { text: "2", value: 2 },
         { text: "3", value: 3 },
+        { text: "All", value: 999 },
+      ],
+      tocLevelItems: [
+        { text: "1", value: 1 },
+        { text: "2", value: 2 },
+        { text: "3", value: 3 },
+        { text: "4", value: 4 },
         { text: "All", value: 999 },
       ],
     };

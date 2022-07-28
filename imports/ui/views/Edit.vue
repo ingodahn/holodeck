@@ -191,7 +191,7 @@ export default {
   meteor: {
     bookObject() {
       const bo = PageCollection.findOne({ _id: this.session.currentBook });
-      return bo ? bo : { title: "No Book Found", pages: [] };
+      return bo ? bo : { title: "Current Book not Found", pages: [] };
     },
   },
 };

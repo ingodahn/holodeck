@@ -29,7 +29,7 @@
           ><v-icon>mdi-map-marker-check-outline</v-icon></v-btn
         >
         <v-btn @click="selectPage = true">
-          {{ currentPage }}
+          {{ currentPage }}/{{ bookObject.pages.length }}
         </v-btn>
 
         <v-autocomplete
@@ -198,13 +198,6 @@ export default {
     },
   },
   computed: {
-    selectablePages() {
-      let selPages = [];
-      for (let i = 1; i <= this.bookPageIds.length; i++) {
-        selPages.push({ text: "Page " + i.toString(), value: i });
-      }
-      return selPages;
-    },
     bookPageIds() {
       return this.bookObject.pages;
     },
@@ -237,7 +230,23 @@ export default {
   meteor: {
     bookObject() {
       const bo = PageCollection.findOne({ _id: this.session.currentBook });
-      return bo ? bo : { title: "No Book Found", pages: [] };
+      return bo ? bo : { title: "Current Book not Found", pages: [] };
+    },
+    selectablePages() {
+      let selPages = [], maxLevel=this.session.tocLevel;
+     
+     for (let i = 1; i <= this.bookPageIds.length; i++) {
+        let pi=this.bookPageIds[i-1];
+        let page=PageCollection.findOne({_id: pi});
+        let title = page.title;
+        if (page.level == 0 && maxLevel == 999)
+        selPages.push({text: '('+i.toString()+') '+page.title, value: i})
+       else if (0 < page.level && page.level <= maxLevel) {
+        let pre=new Array(page.level).join('-');
+        selPages.push({text: pre+' '+page.title, value: i});
+       }
+      }
+      return selPages;
     },
 
     currentUser() {

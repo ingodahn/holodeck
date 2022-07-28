@@ -60,6 +60,7 @@ export default {
       return page ? page : { type: "markdown-cell", data: "Page not found" };
     },
     getContent() {
+      console.log('PC-63:',this.getPage.data);
       return this.getPage.data;
     },
     getCodeContent() {

@@ -36,6 +36,7 @@ export default {
           post: 0,
           debug: true,
         },
+        tocLevel: 4,
         saveSession: true,
         pinboard: [],
         evaluated: new Set(),
@@ -52,6 +53,7 @@ export default {
             post: 0,
             debug: true,
           };
+          this.tocLevel=4;
           this.books = {};
           this.currentBook = dbid;
           this.books[dbid] = 1;

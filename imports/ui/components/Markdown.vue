@@ -1,6 +1,6 @@
 <template>
   <div>
-    <VueShowdown :markdown="content" flavor="github"
+    <VueShowdown :markdown="content" :class="isCurrent"
   />
   </div>
 </template>
@@ -16,7 +16,11 @@ export default {
     content: {
       type: String,
       default: "No markdown content given"
-    }
+    },
+    currentPage: {
+      type: Boolean,
+      default: false
+    },
   },
   data() {
     return {
@@ -38,5 +42,19 @@ export default {
 
     //MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
   },
+  computed: {
+    isCurrent() {
+      return this.currentPage ? "mathcontent currentPage" : "mathcontent";
+    },
+  }
 }
 </script>
+
+<style scoped>
+.currentPage {
+  padding: 1em;
+  border-style: none solid none solid;
+  border-left-color: blue;
+  border-right-color: blue;
+}
+</style>

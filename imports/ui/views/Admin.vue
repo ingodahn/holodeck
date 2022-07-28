@@ -85,7 +85,7 @@ export default {
   watch: {},
   computed: {
     importFile() {
-      console.log('Admin-88:',this.adminMode)
+      console.log("Admin-88:", this.adminMode);
       return this.adminMode == "importJupyter"
         ? {
             type: ".ipynb",
@@ -136,7 +136,7 @@ export default {
     },
     // Making Jupyter Book
     makeJupyterBook(bookData) {
-      console.log('Admin-138: makeJupiterBook called')
+      console.log("Admin-138: makeJupiterBook called");
       let bookPages = [];
       if (!bookData.cells.length) {
         alert("N0 pages found, aborting");
@@ -158,38 +158,70 @@ export default {
           : "label" + Random.id([17]),
       };
       bookData.cells.forEach((c) => {
-        let cc = {
-          type: c.cell_type,
-          data: c.source.join(),
-        };
-        if (c.metadata.label) cc.label = c.metadata.label;
-        cc.title = (c.metadata.title)?c.metadata.title: this.makeTitle(c.source,c.cell_type);
-        const pageId = Random.id([17]);
-        cc._id = pageId;
-        Meteor.call("insertItem", cc);
+        let pageId = this.makeJupyterCell(c);
         bookPages.push(pageId);
-        if (cc.label)
-          Meteor.call("insertItem", {
-            type: "relation",
-            name: 'LabelForId',
-            source: cc.label,
-            target: pageId,
-          });
       });
       Meteor.call(
         "insertItem",
         this.makePlayerBookObject(bookMetaData, bookPages)
       );
-      alert('Book '+bookMetaData.title+' with '+bookPages.length.toString()+' pages saved');
+      alert(
+        "Book " +
+          bookMetaData.title +
+          " with " +
+          bookPages.length.toString() +
+          " pages saved"
+      );
     },
-
-    makeTitle (data,type) {
-      return (type == 'code')?data[0]:data.join().replace(/(\s\s+)/gm, "").split(' ').slice(0,4).join(' ');
+    makeJupyterCell(c) {
+      let cdata = c.source.join('');
+      let cc = {
+        type: c.cell_type,
+        data: cdata,
+        level: c.cell_type == "code" ? 0 : this.getLevel(cdata),
+      };
+      if (c.metadata.label) cc.label = c.metadata.label;
+      cc.title = c.metadata.title
+        ? c.metadata.title
+        : this.makeTitle(c.source, c.cell_type);
+      const pageId = Random.id([17]);
+      cc._id = pageId;
+      Meteor.call("insertItem", cc);
+      /* !!!
+      if (cc.label)
+        Meteor.call("insertItem", {
+          type: "relation",
+          name: "LabelForId",
+          source: cc.label,
+          target: pageId,
+        });
+      */
+      return pageId;
     },
-
-    // For tests only
-    Mcall(type,object) {
-      console.log('Admin-189:',type,object);
+    makeTitle(data, type) {
+      return type == "code"
+        ? data[0]
+        : data
+            .join('')
+            .replace(/(\s\s+)/gm, " ")
+            .replace(/(#+)/gm,"")
+            .replace(/(<\/?[^>]*>)/gm,'')
+            .split(" ")
+            .slice(0, 5)
+            .join(" ");
+    },
+    getLevel(data) {
+      let re=/<h(\d)/;
+      if (re.exec(data)) {
+        //console.log(parseInt(re.exec(data)[1]), 'from h')
+        return parseInt(re.exec(data)[1]);
+      }
+      re=/^(#*)/
+      if (re.exec(data)) {
+        //console.log(re.exec(data)[1].length, 'from #')
+        return re.exec(data)[1].length;
+      }
+      return 0;
     },
 
     // Making Player Book
