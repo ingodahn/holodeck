@@ -114,6 +114,17 @@ export default {
         type: "book",
       });
       bookObject.pages.forEach((pid) => {
+        let pref=PageCollection.findOne({name: 'LabelForId', target: pid});
+        if (pref) {
+          Meteor.call("deleteItem", {
+          type: "relation",
+          $or: [{ source: pref.source }, { target: pref.source }],
+        });
+        }
+        Meteor.call("deleteItem", {
+          type: "relation",
+          $or: [{ source: pid }, { target: pid }],
+        });
         Meteor.call("deleteItem", { _id: pid });
       });
       Meteor.call("deleteItem", { _id: bookObject._id });
@@ -136,12 +147,14 @@ export default {
     },
     // Making Jupyter Book
     makeJupyterBook(bookData) {
+      let bookId = Random.id([17]);
       console.log("Admin-138: makeJupiterBook called");
       let bookPages = [];
       if (!bookData.cells.length) {
         alert("N0 pages found, aborting");
         return;
       }
+      // TODO: BookName for references
       let firstCell = bookData.cells[0];
       let bookMetaData = {
         title: firstCell.metadata.book.title
@@ -155,16 +168,22 @@ export default {
           : "No description given",
         label: firstCell.metadata.book.label
           ? firstCell.metadata.book.label
-          : "label" + Random.id([17]),
+          : "label" + bookId,
       };
       bookData.cells.forEach((c) => {
-        let pageId = this.makeJupyterCell(c);
+        let pageId = this.makeJupyterCell(c, bookMetaData.label);
         bookPages.push(pageId);
       });
       Meteor.call(
         "insertItem",
-        this.makePlayerBookObject(bookMetaData, bookPages)
+        this.makeBookObject(bookMetaData, bookPages, bookId)
       );
+      Meteor.call("insertItem", {
+        type: "relation",
+        name: "LabelForId",
+        source: bookMetaData.label,
+        target: bookId,
+      });
       alert(
         "Book " +
           bookMetaData.title +
@@ -172,22 +191,29 @@ export default {
           bookPages.length.toString() +
           " pages saved"
       );
+      this.checkReferences(bookPages);
     },
-    makeJupyterCell(c) {
-      let cdata = c.source.join('');
+    makeJupyterCell(c, bookLabel) {
+      let cdata0 = c.source.join("");
+      // Next line to overcome markdown
+      let cdata = (c.cell_type == 'markdown') ? cdata0
+        .replace(/\n\n/gm, "_XXX_")
+        .replace(/\n/gm, " ")
+        .replace(/_XXX_/gm, "\n\n") : cdata0;
       let cc = {
         type: c.cell_type,
         data: cdata,
         level: c.cell_type == "code" ? 0 : this.getLevel(cdata),
       };
-      if (c.metadata.label) cc.label = c.metadata.label;
+      // References are implemented through relations LabelForId and label requires label
+      // labels have the form bookLabel/pageLabel
+      if (c.metadata.label) cc.label = bookLabel + "/" + c.metadata.label;
       cc.title = c.metadata.title
         ? c.metadata.title
         : this.makeTitle(c.source, c.cell_type);
       const pageId = Random.id([17]);
       cc._id = pageId;
       Meteor.call("insertItem", cc);
-      /* !!!
       if (cc.label)
         Meteor.call("insertItem", {
           type: "relation",
@@ -195,28 +221,38 @@ export default {
           source: cc.label,
           target: pageId,
         });
-      */
+      // Currently only requires within the same book
+      if (c.metadata.requires) {
+        c.metadata.requires.forEach((referredLabel) => {
+          Meteor.call("insertItem", {
+            type: "relation",
+            name: "requires",
+            source: cc.label,
+            target: bookLabel + "/" + referredLabel,
+          });
+        });
+      }
       return pageId;
     },
     makeTitle(data, type) {
       return type == "code"
         ? data[0]
         : data
-            .join('')
+            .join("")
             .replace(/(\s\s+)/gm, " ")
-            .replace(/(#+)/gm,"")
-            .replace(/(<\/?[^>]*>)/gm,'')
+            .replace(/(#+)/gm, "")
+            .replace(/(<\/?[^>]*>)/gm, "")
             .split(" ")
             .slice(0, 5)
             .join(" ");
     },
     getLevel(data) {
-      let re=/<h(\d)/;
+      let re = /<h(\d)/;
       if (re.exec(data)) {
         //console.log(parseInt(re.exec(data)[1]), 'from h')
         return parseInt(re.exec(data)[1]);
       }
-      re=/^(#*)/
+      re = /^(#*)/;
       if (re.exec(data)) {
         //console.log(re.exec(data)[1].length, 'from #')
         return re.exec(data)[1].length;
@@ -224,10 +260,38 @@ export default {
       return 0;
     },
 
+    checkReferences(idList) {
+      idList.forEach((id) => {
+        let lfi = PageCollection.findOne({ name: "LabelForId", target: id });
+        if (lfi) {
+          let refs = PageCollection.find({
+            name: "requires",
+            source: lfi.source,
+          }).fetch();
+          refs.forEach((refLabel) => {
+            let refIdObject = PageCollection.findOne({
+              name: "LabelForId",
+              source: refLabel,
+            });
+            if (!refIdObject)
+              console.log("Admin: id for label", refLabel, "not found");
+            else if (!PageCollection.findOne({ _id: refIdObject.source }))
+              console.log(
+                "Admin: Page for id",
+                refIdObject.source,
+                "for Reference",
+                refLabel,
+                "not found"
+              );
+          });
+        }
+      });
+    },
+
     // Making Player Book
     makePlayerBook(bookData) {
+      const bookId = Random.id([17]);
       //alert("Making book");
-
       let bookPages = [];
       bookData.data.forEach((element) => {
         const pageId = Random.id([17]);
@@ -235,7 +299,10 @@ export default {
         Meteor.call("insertItem", element);
         bookPages.push(pageId);
       });
-      Meteor.call("insertItem", this.makePlayerBookObject(bookData, bookPages));
+      Meteor.call(
+        "insertItem",
+        this.makeBookObject(bookData, bookPages, bookId)
+      );
     },
     clearPages(selection) {
       Meteor.call("deleteItem", selection);
@@ -253,8 +320,9 @@ export default {
           pages: [],
         });
     },
-    makePlayerBookObject(bookData, bookPages) {
+    makeBookObject(bookData, bookPages, bookId) {
       return {
+        _id: bookId,
         type: "book",
         title: bookData.title,
         authors: bookData.authors,

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <VueShowdown :markdown="content" :class="isCurrent"
+    <VueShowdown :markdown="content" :class="isCurrent" flavor="github" 
   />
   </div>
 </template>

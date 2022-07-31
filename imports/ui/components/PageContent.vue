@@ -7,20 +7,20 @@
           :content="getContent"
           :currentPage="currentPage"
         ></ShowMathDoc>
-        <SageCell
+        <SageCellWrapper
           v-else-if="pageType == 'code-cell'"
           :script="getCodeContent"
           :currentPage="currentPage"
           :pageId="pageId"
           @evaluated="(id) => $emit('evaluated', id)"
-        ></SageCell>
-        <SageCell
+        ></SageCellWrapper>
+        <SageCellWrapper
           v-else-if="pageType == 'code'"
           :script="getContent"
           :currentPage="currentPage"
           :pageId="pageId"
           @evaluated="(id) => $emit('evaluated', id)"
-        ></SageCell>
+        ></SageCellWrapper>
         <Markdown
           v-else-if="pageType == 'markdown'"
           :content="getContent"
@@ -35,7 +35,7 @@
 <script>
 import { PageCollection } from "../../api/collections/PageCollection";
 import ShowMathDoc from "./ShowMathDoc.vue";
-import SageCell from "./SageCell.vue";
+import SageCellWrapper from "./SageCellWrapper.vue";
 import Markdown from "./Markdown.vue";
 export default {
   props: {
@@ -48,7 +48,7 @@ export default {
       default: false,
     },
   },
-  components: { ShowMathDoc, SageCell, Markdown },
+  components: { ShowMathDoc, SageCellWrapper, Markdown },
   data() {
     return {
       session: this.$root.$data.session,
@@ -60,7 +60,6 @@ export default {
       return page ? page : { type: "markdown-cell", data: "Page not found" };
     },
     getContent() {
-      console.log('PC-63:',this.getPage.data);
       return this.getPage.data;
     },
     getCodeContent() {
