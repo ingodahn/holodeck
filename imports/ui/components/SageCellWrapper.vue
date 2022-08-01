@@ -2,8 +2,8 @@
   <div class="container">
     <v-row>
       <v-col cols="mainColSize">
-        <div :class="isCurrent" :name="pageId">
-          <sage-cell :script="myScript" :cellName="pageId" @evaluated="setEvaluated" :key="myScript"></sage-cell>
+        <div :name="pageId">
+          <sage-cell :currentPage="currentPage" :script="myScript" :cellName="pageId" @evaluated="setEvaluated" :key="myScript"></sage-cell>
         </div>
       </v-col>
       <v-col cols="1" v-if="hasMissing">
@@ -96,12 +96,6 @@ export default {
     },
     mainColSize () {
         return (hasMissing)?11:12;
-    },
-    isCurrent() {
-      let ev = this.evaluated ? "evaluated" : "unevaluated";
-      if (this.missingRequired && ! this.evaluated) ev='unavailable'
-      const cur = this.currentPage ? "currentPage" : "";
-      return cur + " " + ev;
     },
   },
 };

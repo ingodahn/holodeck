@@ -183,6 +183,9 @@ export default {
       clone.querySelectorAll(".sagecell_evalButton").forEach((bt) => {
         bt.remove();
       });
+      clone.querySelectorAll(".sagecell_messages").forEach((ms) => {
+        ms.remove();
+      });
       let cloneString = clone.innerHTML;
       let title = PageCollection.findOne({ _id: this.pageIds.cur }).title;
       this.session.pinboard.push({
@@ -221,11 +224,13 @@ export default {
       }
       return { pre: preIds, cur: this.bookPageIds[cur], post: postIds };
     },
-    allSet () {
-      if (! this.session.currentBook || this.session.currentBook == 'null') return false;
-      if (!this.session.books[this.session.currentBook]) this.session.books[this.session.currentBook]= 1;
+    allSet() {
+      if (!this.session.currentBook || this.session.currentBook == "null")
+        return false;
+      if (!this.session.books[this.session.currentBook])
+        this.session.books[this.session.currentBook] = 1;
       return true;
-    }
+    },
   },
   meteor: {
     bookObject() {
@@ -233,18 +238,22 @@ export default {
       return bo ? bo : { title: "Current Book not Found", pages: [] };
     },
     selectablePages() {
-      let selPages = [], maxLevel=this.session.tocLevel;
-     
-     for (let i = 1; i <= this.bookPageIds.length; i++) {
-        let pi=this.bookPageIds[i-1];
-        let page=PageCollection.findOne({_id: pi});
+      let selPages = [],
+        maxLevel = this.session.tocLevel;
+
+      for (let i = 1; i <= this.bookPageIds.length; i++) {
+        let pi = this.bookPageIds[i - 1];
+        let page = PageCollection.findOne({ _id: pi });
         let title = page.title;
         if (page.level == 0 && maxLevel == 999)
-        selPages.push({text: '('+i.toString()+') '+page.title, value: i})
-       else if (0 < page.level && page.level <= maxLevel) {
-        let pre=new Array(page.level).join('-');
-        selPages.push({text: pre+' '+page.title, value: i});
-       }
+          selPages.push({
+            text: "(" + i.toString() + ") " + page.title,
+            value: i,
+          });
+        else if (0 < page.level && page.level <= maxLevel) {
+          let pre = new Array(page.level).join("-");
+          selPages.push({ text: pre + " " + page.title, value: i });
+        }
       }
       return selPages;
     },
