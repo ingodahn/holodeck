@@ -3,7 +3,7 @@
     <v-app-bar fixed app dense>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <template v-if="allSet">
-        <v-icon title="Temporary deck" v-if="isSecondary"
+        <v-icon title="Temporary deck" v-if="isSecondary" color="warning"
           >mdi-content-save-off</v-icon
         >
         &nbsp;

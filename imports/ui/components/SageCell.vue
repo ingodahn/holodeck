@@ -1,5 +1,5 @@
 <template>
-  <div class="container" :class="isCurrent" :name="cellName">
+  <div class="container" :name="cellName">
     <div v-html="makeCell"></div>
   </div>
 </template>
@@ -37,10 +37,6 @@ export default {
         };
       },
     },
-    currentPage: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
@@ -63,12 +59,6 @@ export default {
         this.script +
         "<\/script></div>"
       );
-    },
-    isCurrent() {
-      let ev = this.evaluated ? "evaluated" : "unevaluated";
-      if (this.missingRequired && ! this.evaluated) ev='unavailable'
-      const cur = this.currentPage ? "currentPage" : "";
-      return cur + " " + ev;
     },
   },
 };
