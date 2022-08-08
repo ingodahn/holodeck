@@ -37,6 +37,7 @@
         >
       </v-col>
     </v-row>
+    <MetaData :data="metaDataString" @changedMetaData="saveMetaData"/>
     <v-row>
       <v-col>
         <v-text-field
@@ -57,6 +58,7 @@
 <script>
 import { PageCollection } from "../../api/collections/PageCollection";
 import { Random } from "meteor/random";
+import MetaData from '../components//MetaData.vue';
 
 export default {
   data() {
@@ -75,6 +77,7 @@ export default {
       editMode: null,
     };
   },
+  components: { MetaData },
   mounted() {
     if (this.pageObject) {
       this.editMode = "editThis";
@@ -103,6 +106,19 @@ export default {
   methods: {
     cancel() {
       this.$router.back();
+    },
+    saveMetaData(md) {
+      console.log('Edit-111: saveMetaData called');
+      if (this.editMode == "editThis") {
+        this.current.title=md.title;
+        let cid=this.pageObject._id;
+        Meteor.call('deleteItem',{name: 'LabelForId', target: cid});
+        if (md.label) Meteor.call('insertItem', {type: 'relation',name: 'LabelForId', source: md.label, target: cid})
+        if (md.requires) {
+          Meteor.call('deleteItem',{name: 'requires', source: cid});
+          md.requires.forEach(ll => Meteor.call('insertItem',{type: 'relation', name: 'requires', source: md.label, target: ll}));
+        }
+      }
     },
     save() {
       if (this.editMode == "editThis") this.saveThis();
@@ -187,6 +203,16 @@ export default {
     currentTitle() {
       return this.pageObject.title;
     },
+    metaDataString () {
+      let po = this.pageObject;
+      let md={title: po.title}, pid=po._id;
+      let plabel=PageCollection.findOne({name: 'LabelForId', target: pid});
+      md.label=(plabel)?plabel.source:'';
+      let reqs=PageCollection.find({name: 'requires', source: pid}).fetch();
+      md.requires=(reqs)?reqs:[];
+      return JSON.stringify (md,null,2);
+      
+    }
   },
   meteor: {
     bookObject() {
