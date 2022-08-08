@@ -41,15 +41,18 @@ export default {
   data() {
     return {
       session: this.$root.$data.session,
-      evaluated: this.$root.$data.session.evaluated.has(this.pageId),
+      evaluated: this.$root.$data.session.evaluated.has(this.cellName),
     };
+  },
+  created () {
+    
   },
   mounted() {
     sagecell.makeSagecell(this.options);
   },
   methods: {
     isEvaluated() {
-      this.$emit("evaluated");
+      this.$emit('evaluated')
     },
   },
   computed: {
