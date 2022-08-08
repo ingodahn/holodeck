@@ -31,15 +31,19 @@ let relationMixin = {
                     if (!handled.has(node)) unhandled.add(node)
                 }
                 if (unhandled.size) this.tcClosure(relation,unhandled,direction,handled)
-                console.log(handled)
             return handled
         },
         labels2ids(labels) {
             const ids = [];
             labels.forEach(ll => {
                 let rel = PageCollection.findOne({ name: 'LabelForId', source: ll })
-                if (rel) ids.push(rel.target)
-                else ids.push(ll)
+                if (rel) {
+                    ids.push(rel.target)
+                }
+                else {
+                    console.log('RM-46: No Id for',ll)
+                    ids.push(ll)
+                }
             })
             return ids
         },

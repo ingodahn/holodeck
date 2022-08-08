@@ -84,16 +84,21 @@ export default {
         labelInit.add(labelObject.source);
         let reqs = Array.from(this.tcClosure(rel, labelInit, 1));
         reqs.shift();
-        let reqIds = this.labels2ids(reqs);
-        return reqIds;
+        return reqs; // should be labels
       } else return [];
     },
     addRequired() {
       let sc = "";
-      this.missingRequired.forEach((id) => {
-        let node = PageCollection.findOne({ _id: id });
+      let missReq = this.missingRequired;
+      if (missReq.length > 0) {
+        const bookPages=PageCollection.findOne({_id: this.session.currentBook}).pages;
+        bookPages.forEach((id) => {
+          if (missReq.indexOf(id) > -1) {
+            let node = PageCollection.findOne({ _id: id });
         sc += node.data + "\n"; // doesn't work for html
+          }
       });
+      }
       sc += this.script;
       this.allRequired = true;
       this.myScript = sc;
@@ -102,12 +107,12 @@ export default {
   computed: {
     missingRequired() {
       this.refreshRequirements; // to force re-computation
-      let reqs = this.getRelationTrans("requires");
+      let reqs = this.labels2ids(this.getRelationTrans("requires"));
       let mreqs = [];
       reqs.forEach((r) => {
         if (!this.$root.$data.session.evaluated.has(r)) mreqs.push(r);
       });
-      return mreqs;
+      return mreqs; // returns Ids
     },
     hasMissing() {
       return this.missingRequired.length;
