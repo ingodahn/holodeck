@@ -5,6 +5,7 @@
       <v-btn color="error" class="mx-1 my-1" @click="clearData"
         >Clear Data</v-btn
       >
+      <v-btn color="primary" @click="makeExport()">Export</v-btn>
       <v-btn color="warning" class="mx-1 my-1" @click="adminMode = 'deleteBook'"
         >Remove Book</v-btn
       >
@@ -106,6 +107,14 @@ export default {
         this.clearPages({});
       }
     },
+
+    makeExport() {
+            const allDocs=PageCollection.find({}).fetch();
+            var expString="export const hddata = " + JSON.stringify(allDocs)+';';
+            var FileSaver=require('file-saver');
+            var blob=new Blob([expString], {type: "text/plain;charset=utf-8"})
+            FileSaver.saveAs(blob,"hdData.js");
+        },
 
     deleteBook() {
       if (!this.bookToDelete) return;

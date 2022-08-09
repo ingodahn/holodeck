@@ -76,17 +76,17 @@
           </v-list-item-icon>
           <v-list-item-title>Home</v-list-item-title>
         </v-list-item>
-        <v-list-item link @click="gotoPath('/opened')">
-          <v-list-item-icon>
-            <v-icon>mdi-book-open-variant</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title>Open books</v-list-item-title>
-        </v-list-item>
         <v-list-item link @click="gotoPath('/library')">
           <v-list-item-icon>
             <v-icon>mdi-library-shelves</v-icon>
           </v-list-item-icon>
           <v-list-item-title>Library</v-list-item-title>
+        </v-list-item>
+        <v-list-item link @click="gotoPath('/opened')">
+          <v-list-item-icon>
+            <v-icon>mdi-book-open-variant</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title>Open books</v-list-item-title>
         </v-list-item>
         <v-list-item link @click="gotoPath('/pinboard')">
           <v-list-item-icon>
