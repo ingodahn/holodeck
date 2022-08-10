@@ -86,7 +86,6 @@ export default {
   watch: {},
   computed: {
     importFile() {
-      console.log("Admin-88:", this.adminMode);
       return this.adminMode == "importJupyter"
         ? {
             type: ".ipynb",
@@ -109,12 +108,12 @@ export default {
     },
 
     makeExport() {
-            const allDocs=PageCollection.find({}).fetch();
-            var expString="export const hddata = " + JSON.stringify(allDocs)+';';
-            var FileSaver=require('file-saver');
-            var blob=new Blob([expString], {type: "text/plain;charset=utf-8"})
-            FileSaver.saveAs(blob,"hdData.js");
-        },
+      const allDocs = PageCollection.find({}).fetch();
+      var expString = "export const hddata = " + JSON.stringify(allDocs) + ";";
+      var FileSaver = require("file-saver");
+      var blob = new Blob([expString], { type: "text/plain;charset=utf-8" });
+      FileSaver.saveAs(blob, "hdData.js");
+    },
 
     deleteBook() {
       if (!this.bookToDelete) return;
@@ -123,12 +122,12 @@ export default {
         type: "book",
       });
       bookObject.pages.forEach((pid) => {
-        let pref=PageCollection.findOne({name: 'LabelForId', target: pid});
+        let pref = PageCollection.findOne({ name: "LabelForId", target: pid });
         if (pref) {
           Meteor.call("deleteItem", {
-          type: "relation",
-          $or: [{ source: pref.source }, { target: pref.source }],
-        });
+            type: "relation",
+            $or: [{ source: pref.source }, { target: pref.source }],
+          });
         }
         Meteor.call("deleteItem", {
           type: "relation",
@@ -155,9 +154,54 @@ export default {
       else this.makePlayerBook(bookData);
     },
     // Making Jupyter Book
+    checkMetadata(bd) {
+      if (!this.adminMode == "importJupyter") return true;
+      let ok = true;
+      const pages = bd.cells;
+      if (!pages.length) {
+        alert("No pages found");
+        return false;
+      }
+      if (!pages[0].metadata.book) {
+        alert("Error: Book has no metadata");
+        ok = false;
+      } else {
+        for (let item of ["title", "authors", "label", "description"]) {
+          if (!pages[0].metadata.book[item]) {
+            alert("Error: Book metadata " + item + " missing");
+            ok=false;
+          }
+        }
+      }
+      // Checking backward references and labels
+      let labels = new Set;
+      for (let i=0; i < pages.length; i++) {
+        let md=pages[i].metadata;
+        if (md) {
+          if (md.label) {
+            if (labels.has(md.label)) {
+              alert('Error: Duplicate label '+md.label+' at page '+i.toString)
+              ok=false;
+            } else labels.add(md.label);
+          } else {
+            if (md['requires'] && md['requires'].length) {
+              alert('Error: Missing label at page '+i.toString()+ ' with references '+md['requires'].join());
+              for (let rr of md['requires']) {
+                if (!labels.has(rr)) {
+                  alert('Error: For page '+i.toString()+'Reference '+rr+' not found');
+                  ok= false;
+                }
+              }
+            }
+          }
+        }
+      }
+      return ok;
+    },
     makeJupyterBook(bookData) {
-      let bookId = Random.id([17]);
       console.log("Admin-138: makeJupiterBook called");
+      if (! this.checkMetadata(bookData)) return;
+      let bookId = Random.id([17]);
       let bookPages = [];
       if (!bookData.cells.length) {
         alert("N0 pages found, aborting");
@@ -166,18 +210,10 @@ export default {
       // TODO: BookName for references
       let firstCell = bookData.cells[0];
       let bookMetaData = {
-        title: firstCell.metadata.book.title
-          ? firstCell.metadata.book.title
-          : "No title given",
-        authors: firstCell.metadata.book.authors
-          ? firstCell.metadata.book.authors
-          : "No authors given",
-        description: firstCell.metadata.book.description
-          ? firstCell.metadata.book.description
-          : "No description given",
+        title: firstCell.metadata.book.title,
+        authors: firstCell.metadata.book.authors,
+        description: firstCell.metadata.book.description,
         label: firstCell.metadata.book.label
-          ? firstCell.metadata.book.label
-          : "label" + bookId,
       };
       bookData.cells.forEach((c) => {
         let pageId = this.makeJupyterCell(c, bookMetaData.label);
@@ -205,10 +241,13 @@ export default {
     makeJupyterCell(c, bookLabel) {
       let cdata0 = c.source.join("");
       // Next line to overcome markdown
-      let cdata = (c.cell_type == 'markdown') ? cdata0
-        .replace(/\n\n/gm, "_XXX_")
-        .replace(/\n/gm, " ")
-        .replace(/_XXX_/gm, "\n\n") : cdata0;
+      let cdata =
+        c.cell_type == "markdown"
+          ? cdata0
+              .replace(/\n\n/gm, "_XXX_")
+              .replace(/\n/gm, " ")
+              .replace(/_XXX_/gm, "\n\n")
+          : cdata0;
       let cc = {
         type: c.cell_type,
         data: cdata,
