@@ -2,25 +2,25 @@
   <div class="container">
     <v-main>
       <div v-if="this.bookObject.pages.length != 0">
-      <v-row v-for="item in pageIds.pre" :key="item">
-        <v-col>
-          <page-content :pageId="item"></page-content>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <page-content
-            :pageId="pageIds.cur"
-            currentPage
-            ref="currentPage"
-          ></page-content>
-        </v-col>
-      </v-row>
-      <v-row v-for="item in pageIds.post" :key="item">
-        <v-col>
-          <page-content :pageId="item"></page-content>
-        </v-col>
-      </v-row>
+        <v-row v-for="item in pageIds.pre" :key="item">
+          <v-col>
+            <page-content :pageId="item"></page-content>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <page-content
+              :pageId="pageIds.cur"
+              currentPage
+              ref="currentPage"
+            ></page-content>
+          </v-col>
+        </v-row>
+        <v-row v-for="item in pageIds.post" :key="item">
+          <v-col>
+            <page-content :pageId="item"></page-content>
+          </v-col>
+        </v-row>
       </div>
       <div v-else>No pages to show. Please open a book from the library.</div>
     </v-main>
@@ -38,6 +38,7 @@ export default {
     this.pageIndex = parseInt(this.$route.params.pageIndex);
     this.session.currentPage = this.pageIndex ? this.pageIndex : 1;
   },
+
   data() {
     return {
       session: this.$root.$data.session,
@@ -48,12 +49,11 @@ export default {
   },
 
   components: { PageContent },
-  methods: {
-  },
+  methods: {},
 
   computed: {
     bookPageIds() {
-      return (this.bookObject.pages.length)?this.bookObject.pages:[];
+      return this.bookObject.pages.length ? this.bookObject.pages : [];
     },
     pageIds() {
       let cur0 = this.pageIndex,
