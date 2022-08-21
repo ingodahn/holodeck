@@ -271,6 +271,10 @@ export default {
         });
       // Currently only requires within the same book
       if (c.metadata.requires) {
+        if (!(typeof c.metadata.requires == 'object')) {
+          alert("Error: Requires for label "+c.metadata.label+' must be an array.');
+          return;
+        }
         c.metadata.requires.forEach((referredLabel) => {
           Meteor.call("insertItem", {
             type: "relation",
