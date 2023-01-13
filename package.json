@@ -16,7 +16,7 @@
     "vue-meteor-tracker": "^2.0.0-beta.5",
     "vue-router": "^3.5.4",
     "vue-showdown": "^2.4.1",
-    "vuetify": "^2.6.6"
+    "vuetify": "^2.6.14"
   },
   "meteor": {
     "mainModule": {
