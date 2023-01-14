@@ -17,6 +17,10 @@ export default {
       type: String,
       default: 'sagecell'
     },
+    serverName: {
+      type: String,
+      default: 'sageServer'
+    },
     options: {
       type: Object,
       default() {
@@ -28,7 +32,7 @@ export default {
           languages: ["sage"],
           evalButtonText: "Evaluate",
           linked: true,
-          linkKey: "Holodeck",
+          linkKey: this.serverName,
           callback: () => {
             let node = document.getElementsByName(this.cellName)[0];
             let bt = node.getElementsByClassName("sagecell_evalButton");
@@ -40,13 +44,9 @@ export default {
   },
   data() {
     return {
-      session: this.$root.$data.session,
-      evaluated: this.$root.$data.session.evaluated.has(this.cellName),
     };
   },
-  created () {
-    
-  },
+  
   mounted() {
     sagecell.makeSagecell(this.options);
   },

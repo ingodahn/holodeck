@@ -239,6 +239,16 @@ export default {
       this.checkReferences(bookPages);
     },
     makeJupyterCell(c, bookLabel) {
+      if (c.cell_type == "markdown") {
+        for (let i=0;i<c.source.length;i++) {
+          if (c.source[i].charAt(0)=='#'){
+            c.source[i]=c.source[i]+"\n";
+          }
+          if (c.source[i].charAt(0)=="*") {
+            c.source[i]="\n"+c.source[i];
+          }
+        }
+      }
       let cdata0 = c.source.join("");
       // Next line to overcome markdown
       let cdata =
@@ -376,6 +386,7 @@ export default {
       return {
         _id: bookId,
         type: "book",
+        label: bookData.label,
         title: bookData.title,
         authors: bookData.authors,
         description: bookData.description,

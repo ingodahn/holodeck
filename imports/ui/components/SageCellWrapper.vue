@@ -10,6 +10,7 @@
             :cellName="pageId"
             @evaluated="setEvaluated"
             :key="myScript"
+            :serverName="bookLabel"
           ></sage-cell>
         </div>
       </v-col>
@@ -32,6 +33,7 @@ import SageCell from "./SageCell.vue";
 
 export default {
   components: { SageCell },
+  
   props: {
     script: {
       type: String,
@@ -52,9 +54,13 @@ export default {
       session: this.$root.$data.session,
       evaluated: this.$root.$data.session.evaluated.has(this.pageId),
       myScript: this.script,
+      myServerName: this.serverName,
       allRequired: false,
       refreshRequirements: false
     };
+  },
+  mounted () {
+    //alert(this.serverName);
   },
   created() {
     let ff = this.checkStatus;
@@ -127,6 +133,11 @@ export default {
       const cur = this.currentPage ? "currentPage" : "";
       return cur + " " + ev;
     },
+    bookLabel() {
+      const bo = PageCollection.findOne({ _id: this.session.currentBook });
+      console.log('SCW-137'+bo.label);
+      return bo ? bo.label : 'holodeck';
+    }
   },
 };
 </script>
