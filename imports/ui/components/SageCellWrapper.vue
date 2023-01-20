@@ -5,22 +5,22 @@
         <div :name="pageId">
           <sage-cell
             :currentPage="currentPage"
-            :script="myScript"
+            :script="currentScript()"
             :class="isCurrent"
             :cellName="pageId"
             @evaluated="setEvaluated"
-            :key="myScript"
+            :key="myKey"
             :serverName="bookLabel"
           ></sage-cell>
         </div>
       </v-col>
-      <v-col cols="1" v-if="hasMissing && !allRequired">
-        <p>
-          Click to add prerequisites:
-          <v-btn icon @click="addRequired()"
+      <v-col cols="1" v-if="needsMissing || needsReset">
+          <v-btn v-if="needsMissing" icon @click="addRequired()" title="Add prerequisites"
             ><v-icon>mdi-vector-polyline-edit</v-icon></v-btn
           >
-        </p>
+          <v-btn v-if="needsReset" icon @click="reset()" title="Reset this cell"
+            ><v-icon>mdi-undo-variant</v-icon></v-btn
+          >
       </v-col>
     </v-row>
   </div>
@@ -33,11 +33,15 @@ import SageCell from "./SageCell.vue";
 
 export default {
   components: { SageCell },
-  
+
   props: {
     script: {
       type: String,
       default: "1+1",
+    },
+    scriptModified: {
+      type: Boolean,
+      default: false,
     },
     currentPage: {
       type: Boolean,
@@ -53,13 +57,13 @@ export default {
     return {
       session: this.$root.$data.session,
       evaluated: this.$root.$data.session.evaluated.has(this.pageId),
-      myScript: this.script,
+      myKey: 1,
       myServerName: this.serverName,
       allRequired: false,
-      refreshRequirements: false
+      refreshRequirements: false,
     };
   },
-  mounted () {
+  mounted() {
     //alert(this.serverName);
   },
   created() {
@@ -69,10 +73,11 @@ export default {
   methods: {
     checkStatus() {
       this.evaluated = this.$root.$data.session.evaluated.has(this.pageId);
-      this.refreshRequirements=!this.refreshRequirements; // to force update
+      this.refreshRequirements = !this.refreshRequirements; // to force update
     },
-    setEvaluated() {
+    setEvaluated(newScript) {
       this.$root.$data.session.evaluated.add(this.pageId); // record evaluation in session
+      this.session.modifiedScripts[this.pageId] = newScript;
       this.evaluated = true;
       if (this.allRequired)
         this.missingRequired.forEach((id) => {
@@ -97,17 +102,38 @@ export default {
       let sc = "";
       let missReq = this.missingRequired;
       if (missReq.length > 0) {
-        const bookPages=PageCollection.findOne({_id: this.session.currentBook}).pages;
+        const bookPages = PageCollection.findOne({
+          _id: this.session.currentBook,
+        }).pages;
         bookPages.forEach((id) => {
           if (missReq.indexOf(id) > -1) {
-            let node = PageCollection.findOne({ _id: id });
-        sc += node.data + "\n"; // doesn't work for html
+            sc += this.getCurrentScript(id) + "\n"; // doesn't work for html
           }
-      });
+        });
+        this.needsReset;
       }
       sc += this.script;
       this.allRequired = true;
-      this.myScript = sc;
+      this.session.modifiedScripts[this.pageId] = sc;
+      this.myKey = this.myKey + 1;
+    },
+    getCurrentScript(id) {
+      return this.session.modifiedScripts[id]
+        ? this.session.modifiedScripts[id]
+        : PageCollection.findOne({ _id: id }).data;
+    },
+    currentScript() {
+      return this.session.modifiedScripts[this.pageId]
+        ? this.session.modifiedScripts[this.pageId]
+        : this.script;
+    },
+    reset() {
+      delete this.session.modifiedScripts[this.pageId];
+      this.evaluated = false;
+      this.allRequired = false;
+      this.myKey = this.myKey + 1;
+      this.needsReset;
+      this.$root.$emit("evaluationUpdated"); // tell other components
     },
   },
   computed: {
@@ -123,21 +149,28 @@ export default {
     hasMissing() {
       return this.missingRequired.length;
     },
+    needsMissing() {
+      return this.hasMissing && !this.allRequired;
+    },
+    needsReset() {
+      return this.session.modifiedScripts.hasOwnProperty(this.pageId);
+    },
     mainColSize() {
       return hasMissing ? 11 : 12;
     },
     isCurrent() {
       this.refreshRequirements; // to force re-computation
       let ev = this.evaluated ? "evaluated" : "unevaluated";
-      if (this.missingRequired.length  && !this.allRequired && !this.evaluated) ev = "unavailable";
+      if (this.missingRequired.length && !this.allRequired && !this.evaluated)
+        ev = "unavailable";
       const cur = this.currentPage ? "currentPage" : "";
       return cur + " " + ev;
     },
     bookLabel() {
       const bo = PageCollection.findOne({ _id: this.session.currentBook });
-      console.log('SCW-137'+bo.label);
-      return bo ? bo.label : 'holodeck';
-    }
+      console.log("SCW-137" + bo.label);
+      return bo ? bo.label : "holodeck";
+    },
   },
 };
 </script>

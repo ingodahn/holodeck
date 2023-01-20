@@ -39,6 +39,7 @@ export default {
         tocLevel: 4,
         saveSession: true,
         pinboard: [],
+        modifiedScripts: {},
         evaluated: new Set(),
         sidebar: true,
         set(item, newValue, by = "anonymous") {

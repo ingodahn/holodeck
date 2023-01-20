@@ -37,6 +37,8 @@ export default {
             let node = document.getElementsByName(this.cellName)[0];
             let bt = node.getElementsByClassName("sagecell_evalButton");
             bt[0].addEventListener("click", this.isEvaluated);
+            let cm = node.getElementsByClassName("CodeMirror");
+            cm[0].addEventListener("change", this.isEdited);
           },
         };
       },
@@ -52,7 +54,17 @@ export default {
   },
   methods: {
     isEvaluated() {
-      this.$emit('evaluated')
+      let script = this.getCurrentScript();
+      this.$emit('evaluated',script);
+    },
+    isEdited() {
+      this.$emit('edited')
+    },
+    getCurrentScript () {
+      let node = document.getElementsByName(this.cellName)[0];
+      let cm = node.getElementsByClassName("CodeMirror");
+      let script=cm[0].CodeMirror.getValue();
+      return script;
     },
   },
   computed: {
