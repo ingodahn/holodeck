@@ -62,6 +62,7 @@ export default {
           this.pinboard = [];
           this.sidebar = true;
           this.evaluated = new Set();
+          this.modifiedScripts = {};
         },
         currentPage() {
           if (this.currentBook && this.books[this.currentBook]) {
@@ -79,6 +80,12 @@ export default {
   },
   mounted() {
     this.resumeSession();
+    window.onbeforeunload = () => {
+      this.session.evaluated = new Set();
+      if (this.session.saveSession) {
+        localStorage.setItem("mtHolodeckSession", this.sessionString);
+      }
+    };
   },
   watch: {},
   methods: {

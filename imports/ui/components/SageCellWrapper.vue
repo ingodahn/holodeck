@@ -10,17 +10,21 @@
             :cellName="pageId"
             @evaluated="setEvaluated"
             :key="myKey"
-            :serverName="bookLabel"
+            serverName="holodeck"
           ></sage-cell>
         </div>
       </v-col>
       <v-col cols="1" v-if="needsMissing || needsReset">
-          <v-btn v-if="needsMissing" icon @click="addRequired()" title="Add prerequisites"
-            ><v-icon>mdi-vector-polyline-edit</v-icon></v-btn
-          >
-          <v-btn v-if="needsReset" icon @click="reset()" title="Reset this cell"
-            ><v-icon>mdi-undo-variant</v-icon></v-btn
-          >
+        <v-btn
+          v-if="needsMissing"
+          icon
+          @click="addRequired()"
+          title="Click to add prerequisites"
+          ><v-icon>mdi-vector-polyline-edit</v-icon></v-btn
+        >
+        <v-btn v-if="needsReset" icon @click="reset()" title="Click to reset this cell"
+          ><v-icon>mdi-undo-variant</v-icon></v-btn
+        >
       </v-col>
     </v-row>
   </div>
@@ -63,9 +67,7 @@ export default {
       refreshRequirements: false,
     };
   },
-  mounted() {
-    //alert(this.serverName);
-  },
+  
   created() {
     let ff = this.checkStatus;
     this.$root.$on("evaluationUpdated", ff);
@@ -98,17 +100,25 @@ export default {
         return reqs; // should be labels
       } else return [];
     },
+    getRelationTransList(rel) {
+      let labelObject = PageCollection.findOne({
+        name: "LabelForId",
+        target: this.pageId,
+      });
+      if (labelObject) {
+        let pageIdLabel=labelObject.source;
+        let labelInit=[pageIdLabel];
+        let reqs = this.tcClosureList(rel, labelInit, 1);
+        reqs.shift();
+        return reqs; // should be labels
+      } else return [];
+    },
     addRequired() {
       let sc = "";
       let missReq = this.missingRequired;
       if (missReq.length > 0) {
-        const bookPages = PageCollection.findOne({
-          _id: this.session.currentBook,
-        }).pages;
-        bookPages.forEach((id) => {
-          if (missReq.indexOf(id) > -1) {
-            sc += this.getCurrentScript(id) + "\n"; // doesn't work for html
-          }
+        missReq.forEach((id) => {
+          sc += this.getCurrentScript(id) + "\n"; // doesn't work for html
         });
         this.needsReset;
       }
@@ -132,14 +142,72 @@ export default {
       this.evaluated = false;
       this.allRequired = false;
       this.myKey = this.myKey + 1;
-      this.needsReset;
+      //this.needsReset;
       this.$root.$emit("evaluationUpdated"); // tell other components
+    },
+    // Convert the list of labels of required pages to a list of page ids sorted by book
+    sortByBooks(pageList) {
+      let currentBookLabel=this.ids2labels([this.session.currentBook])[0];
+      let bookList = this.getPrerequisiteLabelsSorted(this.ids2labels([this.session.currentBook])[0]);
+      let bookPageIdsSorted=[];
+      for (let i = 0; i < bookList.length; i++) {
+        let book = bookList[i];
+        // get all prequired ages of this book
+        let bookPageLabels = pageList.filter((p) => this.bookLabel(p) === book);
+        bookPageLabels.forEach((p) => {
+          let index = pageList.indexOf(p);
+          pageList.splice(index, 1);
+        });
+        bookPageIdsSorted = bookPageIdsSorted.concat(this.sortBookLabelIds(bookPageLabels,book));
+      }
+      return bookPageIdsSorted;
+    },
+    prerequisites(bookId) {
+      let book = PageCollection.findOne({ _id: bookId });
+      return book.requires ? book.requires : [];
+    },
+    addPrerequisiteLabels(labelList, labelObject) {
+      labelList.forEach((label) => {
+        if (!labelObject[label]) {
+          let bookId = PageCollection.findOne({
+            name: "LabelForId",
+            source: label,
+          }).target;
+          let reqs = this.prerequisites(bookId);
+          labelObject[label] = reqs;
+          this.addPrerequisiteLabels(reqs, labelObject);
+        }
+      });
+    },
+    sortLabelObject(labelObject) {
+      let sorted = [], ready= false;
+      while (!ready) {
+        ready = true;
+        for (let label in labelObject) {
+          let newLabels = labelObject[label].filter((l) => !sorted.includes(l));
+          if (newLabels.length == 0) {
+            sorted.push(label);
+            delete labelObject[label];
+            ready = false;
+          }
+        }
+      }
+      return sorted;
+    },
+    getPrerequisiteLabelsSorted(label) {
+      let id=PageCollection.findOne({name: "LabelForId", source: label}).target;
+      let reqs = this.prerequisites(id);
+      let labelObject = {};
+      labelObject[label]= reqs;
+      this.addPrerequisiteLabels(reqs, labelObject);
+      return this.sortLabelObject(labelObject);
     },
   },
   computed: {
     missingRequired() {
       this.refreshRequirements; // to force re-computation
-      let reqs = this.labels2ids(this.getRelationTrans("requires"));
+      // TODO: Books hinzufügen
+      let reqs = this.sortByBooks(this.getRelationTransList("requires"));
       let mreqs = [];
       reqs.forEach((r) => {
         if (!this.$root.$data.session.evaluated.has(r)) mreqs.push(r);
@@ -165,11 +233,6 @@ export default {
         ev = "unavailable";
       const cur = this.currentPage ? "currentPage" : "";
       return cur + " " + ev;
-    },
-    bookLabel() {
-      const bo = PageCollection.findOne({ _id: this.session.currentBook });
-      console.log("SCW-137" + bo.label);
-      return bo ? bo.label : "holodeck";
     },
   },
 };

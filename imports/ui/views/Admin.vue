@@ -213,12 +213,23 @@ export default {
         title: firstCell.metadata.book.title,
         authors: firstCell.metadata.book.authors,
         description: firstCell.metadata.book.description,
-        label: firstCell.metadata.book.label
+        label: firstCell.metadata.book.label,
+        requires: []
       };
       bookData.cells.forEach((c) => {
+        if (c.metadata && c.metadata.requires) {
+          c.metadata.requires.forEach((r) => {
+            let bs=r.search('/');
+            let rtitle = (bs > -1)?r.slice(0,bs):'';
+            if (rtitle && !bookMetaData.requires.includes(rtitle)) {
+              bookMetaData.requires.push(rtitle);
+            }
+          });
+        }
         let pageId = this.makeJupyterCell(c, bookMetaData.label);
         bookPages.push(pageId);
       });
+      console.log("Admin-232: bookMetaData", bookMetaData);
       Meteor.call(
         "insertItem",
         this.makeBookObject(bookMetaData, bookPages, bookId)
@@ -234,7 +245,7 @@ export default {
           bookMetaData.title +
           " with " +
           bookPages.length.toString() +
-          " pages saved"
+          " pages saved with Id " + bookId
       );
       this.checkReferences(bookPages);
     },
@@ -286,11 +297,12 @@ export default {
           return;
         }
         c.metadata.requires.forEach((referredLabel) => {
+          let targetLabel = (referredLabel.includes("/")) ? referredLabel : bookLabel + "/" + referredLabel;
           Meteor.call("insertItem", {
             type: "relation",
             name: "requires",
             source: cc.label,
-            target: bookLabel + "/" + referredLabel,
+            target: targetLabel,
           });
         });
       }
@@ -350,7 +362,7 @@ export default {
       });
     },
 
-    // Making Player Book
+    /* Making Player Book
     makePlayerBook(bookData) {
       const bookId = Random.id([17]);
       //alert("Making book");
@@ -366,6 +378,7 @@ export default {
         this.makeBookObject(bookData, bookPages, bookId)
       );
     },
+    */
     clearPages(selection) {
       Meteor.call("deleteItem", selection);
       /*
@@ -388,6 +401,7 @@ export default {
         type: "book",
         label: bookData.label,
         title: bookData.title,
+        requires: bookData.requires,
         authors: bookData.authors,
         description: bookData.description,
         pages: bookPages,
