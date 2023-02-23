@@ -25,6 +25,12 @@
         <v-btn v-if="needsReset" icon @click="reset()" title="Click to reset this cell"
           ><v-icon>mdi-undo-variant</v-icon></v-btn
         >
+        <v-btn v-if="hidden" icon @click="showInput()" title="Click to reveal cell input"
+          ><v-icon>mdi-eye-outline</v-icon></v-btn
+        >
+        <v-btn v-else icon @click="hideInput()" title="Click to hide cell input"
+          ><v-icon>mdi-eye-off-outline</v-icon></v-btn
+        >
       </v-col>
     </v-row>
   </div>
@@ -65,6 +71,7 @@ export default {
       myServerName: this.serverName,
       allRequired: false,
       refreshRequirements: false,
+      hidden: false
     };
   },
   
@@ -145,6 +152,14 @@ export default {
       //this.needsReset;
       this.$root.$emit("evaluationUpdated"); // tell other components
     },
+    hideInput() {
+      this.hidden=true;
+      $('.sagecell_input').hide();
+    },
+    showInput() {
+      this.hidden=false;
+      $('.sagecell_input').show();
+    },
     // Convert the list of labels of required pages to a list of page ids sorted by book
     sortByBooks(pageList) {
       let currentBookLabel=this.ids2labels([this.session.currentBook])[0];
@@ -195,12 +210,24 @@ export default {
       return sorted;
     },
     getPrerequisiteLabelsSorted(label) {
+      try {
+        let labelObject = {};
+        let reqs = this.prerequisites(PageCollection.findOne({name: "LabelForId", source: label}).target);
+        labelObject[label]= reqs;
+        this.addPrerequisiteLabels(reqs, labelObject);
+        return this.sortLabelObject(labelObject);
+      } catch (e) {
+        alert("Error in getPrerequisiteLabelsSorted for " + label+ ":"+ e)
+        return [];
+      }
+      /*
       let id=PageCollection.findOne({name: "LabelForId", source: label}).target;
       let reqs = this.prerequisites(id);
       let labelObject = {};
       labelObject[label]= reqs;
       this.addPrerequisiteLabels(reqs, labelObject);
       return this.sortLabelObject(labelObject);
+      */
     },
   },
   computed: {

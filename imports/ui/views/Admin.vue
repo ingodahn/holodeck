@@ -15,12 +15,6 @@
         @click="adminMode = 'importJupyter'"
         >Import Jupyter Notebook</v-btn
       >
-      <v-btn
-        color="success"
-        class="mx-1 my-1"
-        @click="adminMode = 'importPlayer'"
-        >Import book from NotebookPlayer</v-btn
-      >
       <v-row v-if="adminMode == 'deleteBook'">
         <v-col>
           <v-select
@@ -77,7 +71,7 @@ import UserManagement from "../components/UserManagement.vue";
 export default {
   data() {
     return {
-      adminMode: "importPlayer",
+      adminMode: "importJupyter",
       sessionFile: null,
       bookToDelete: null,
     };
@@ -135,7 +129,12 @@ export default {
         });
         Meteor.call("deleteItem", { _id: pid });
       });
-      Meteor.call("deleteItem", { _id: bookObject._id });
+      let bookLabel= PageCollection.findOne({ name: "LabelForId", target: this.bookToDelete }).source;
+      Meteor.call("deleteItem", {
+        type: "relation",
+        $or: [{ source: bookLabel }, { target: bookLabel }],
+      });
+      Meteor.call("deleteItem", { _id: this.bookToDelete });
     },
     importBook() {
       if (!this.sessionFile) {
@@ -169,27 +168,40 @@ export default {
         for (let item of ["title", "authors", "label", "description"]) {
           if (!pages[0].metadata.book[item]) {
             alert("Error: Book metadata " + item + " missing");
-            ok=false;
+            ok = false;
           }
         }
       }
       // Checking backward references and labels
-      let labels = new Set;
-      for (let i=0; i < pages.length; i++) {
-        let md=pages[i].metadata;
+      let labels = new Set();
+      for (let i = 0; i < pages.length; i++) {
+        let md = pages[i].metadata;
         if (md) {
           if (md.label) {
             if (labels.has(md.label)) {
-              alert('Error: Duplicate label '+md.label+' at page '+i.toString)
-              ok=false;
+              alert(
+                "Error: Duplicate label " + md.label + " at page " + i.toString
+              );
+              ok = false;
             } else labels.add(md.label);
           } else {
-            if (md['requires'] && md['requires'].length) {
-              alert('Error: Missing label at page '+i.toString()+ ' with references '+md['requires'].join());
-              for (let rr of md['requires']) {
+            if (md["requires"] && md["requires"].length) {
+              alert(
+                "Error: Missing label at page " +
+                  i.toString() +
+                  " with references " +
+                  md["requires"].join()
+              );
+              for (let rr of md["requires"]) {
                 if (!labels.has(rr)) {
-                  alert('Error: For page '+i.toString()+'Reference '+rr+' not found');
-                  ok= false;
+                  alert(
+                    "Error: For page " +
+                      i.toString() +
+                      "Reference " +
+                      rr +
+                      " not found"
+                  );
+                  ok = false;
                 }
               }
             }
@@ -199,8 +211,7 @@ export default {
       return ok;
     },
     makeJupyterBook(bookData) {
-      console.log("Admin-138: makeJupiterBook called");
-      if (! this.checkMetadata(bookData)) return;
+      if (!this.checkMetadata(bookData)) return;
       let bookId = Random.id([17]);
       let bookPages = [];
       if (!bookData.cells.length) {
@@ -214,13 +225,13 @@ export default {
         authors: firstCell.metadata.book.authors,
         description: firstCell.metadata.book.description,
         label: firstCell.metadata.book.label,
-        requires: []
+        requires: [],
       };
       bookData.cells.forEach((c) => {
         if (c.metadata && c.metadata.requires) {
           c.metadata.requires.forEach((r) => {
-            let bs=r.search('/');
-            let rtitle = (bs > -1)?r.slice(0,bs):'';
+            let bs = r.search("/");
+            let rtitle = bs > -1 ? r.slice(0, bs) : "";
             if (rtitle && !bookMetaData.requires.includes(rtitle)) {
               bookMetaData.requires.push(rtitle);
             }
@@ -229,7 +240,6 @@ export default {
         let pageId = this.makeJupyterCell(c, bookMetaData.label);
         bookPages.push(pageId);
       });
-      console.log("Admin-232: bookMetaData", bookMetaData);
       Meteor.call(
         "insertItem",
         this.makeBookObject(bookMetaData, bookPages, bookId)
@@ -245,18 +255,19 @@ export default {
           bookMetaData.title +
           " with " +
           bookPages.length.toString() +
-          " pages saved with Id " + bookId
+          " pages saved with Id " +
+          bookId
       );
       this.checkReferences(bookPages);
     },
     makeJupyterCell(c, bookLabel) {
       if (c.cell_type == "markdown") {
-        for (let i=0;i<c.source.length;i++) {
-          if (c.source[i].charAt(0)=='#'){
-            c.source[i]=c.source[i]+"\n";
+        for (let i = 0; i < c.source.length; i++) {
+          if (c.source[i].charAt(0) == "#") {
+            c.source[i] = c.source[i] + "\n";
           }
-          if (c.source[i].charAt(0)=="*") {
-            c.source[i]="\n"+c.source[i];
+          if (c.source[i].charAt(0) == "*") {
+            c.source[i] = "\n" + c.source[i];
           }
         }
       }
@@ -292,12 +303,18 @@ export default {
         });
       // Currently only requires within the same book
       if (c.metadata.requires) {
-        if (!(typeof c.metadata.requires == 'object')) {
-          alert("Error: Requires for label "+c.metadata.label+' must be an array.');
+        if (!(typeof c.metadata.requires == "object")) {
+          alert(
+            "Error: Requires for label " +
+              c.metadata.label +
+              " must be an array."
+          );
           return;
         }
         c.metadata.requires.forEach((referredLabel) => {
-          let targetLabel = (referredLabel.includes("/")) ? referredLabel : bookLabel + "/" + referredLabel;
+          let targetLabel = referredLabel.includes("/")
+            ? referredLabel
+            : bookLabel + "/" + referredLabel;
           Meteor.call("insertItem", {
             type: "relation",
             name: "requires",
@@ -362,23 +379,6 @@ export default {
       });
     },
 
-    /* Making Player Book
-    makePlayerBook(bookData) {
-      const bookId = Random.id([17]);
-      //alert("Making book");
-      let bookPages = [];
-      bookData.data.forEach((element) => {
-        const pageId = Random.id([17]);
-        element._id = pageId;
-        Meteor.call("insertItem", element);
-        bookPages.push(pageId);
-      });
-      Meteor.call(
-        "insertItem",
-        this.makeBookObject(bookData, bookPages, bookId)
-      );
-    },
-    */
     clearPages(selection) {
       Meteor.call("deleteItem", selection);
       /*

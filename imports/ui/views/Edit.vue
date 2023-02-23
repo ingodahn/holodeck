@@ -208,7 +208,7 @@ export default {
       let md={title: po.title}, pid=po._id;
       let plabel=PageCollection.findOne({name: 'LabelForId', target: pid});
       md.label=(plabel)?plabel.source:'';
-      let reqs=PageCollection.find({name: 'requires', source: pid}).fetch();
+      let reqs=PageCollection.find({name: 'requires', source: md.label}).fetch();
       md.requires=(reqs)?reqs:[];
       return JSON.stringify (md,null,2);
       

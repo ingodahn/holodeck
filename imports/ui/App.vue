@@ -113,7 +113,7 @@ export default {
           this.$router.push('/');
         }
       } else {
-        alert("No session yet");
+        alert("No session yet, please select a book from the library.");
       }
     },
   },
