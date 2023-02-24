@@ -10,7 +10,7 @@
             :cellName="pageId"
             @evaluated="setEvaluated"
             :key="myKey"
-            serverName="holodeck"
+            kernelKey="holodeck"
           ></sage-cell>
         </div>
       </v-col>
@@ -68,7 +68,7 @@ export default {
       session: this.$root.$data.session,
       evaluated: this.$root.$data.session.evaluated.has(this.pageId),
       myKey: 1,
-      myServerName: this.serverName,
+      myKernelKey: this.kernelKey,
       allRequired: false,
       refreshRequirements: false,
       hidden: false

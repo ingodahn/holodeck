@@ -17,7 +17,7 @@ export default {
       type: String,
       default: 'sagecell'
     },
-    serverName: {
+    kernelKey: {
       type: String,
       default: 'sageServer'
     },
@@ -32,7 +32,7 @@ export default {
           languages: ["sage"],
           evalButtonText: "Evaluate",
           linked: true,
-          linkKey: this.serverName,
+          linkKey: this.kernelKey,
           callback: () => {
             let node = document.getElementsByName(this.cellName)[0];
             let bt = node.getElementsByClassName("sagecell_evalButton");
